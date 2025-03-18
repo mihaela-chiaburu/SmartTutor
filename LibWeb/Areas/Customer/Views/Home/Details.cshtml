@@ -20,41 +20,22 @@
             <div class="row">
                 <div class="col-12 col-lg-4 text-center mb-3">
                     @if (Model.CourseImages != null && Model.CourseImages.Any())
-
                     {
-                        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
-                                @foreach (var imageWithIndex in Model.CourseImages.Select((image, index) => new { CourseImage = image, Index = index }))
-
-                                {
-                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@imageWithIndex.Index"
-                                            class="@(imageWithIndex.Index == 0 ? "active" : "")" aria-current="true" aria-label="Slide @imageWithIndex.Index"></button>
-                                }
-                            </div>
-                            <div class="carousel-inner">
-                                @foreach (var imageWithIndex in Model.CourseImages.Select((image, index) => new { CourseImage = image, Index = index }))
-
-                                {
-                                    <div class="@(imageWithIndex.Index == 0 ? "carousel-item active" : "carousel-item")">
-                                        <img src="@imageWithIndex.CourseImage.ImageUrl" class="d-block w-100" alt="Course Image">
-                                    </div>
-                                }
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
+                        var firstImage = Model.CourseImages.FirstOrDefault();
+                        if (firstImage != null)
+                        {
+                            <img src="@Url.Content(Model.CourseImages.FirstOrDefault()?.ImageUrl)" class="card-img-top rounded" alt="Course Image" />
+                        }
+                        else
+                        {
+                            <img src="http://placehold.co/500x600/png" class="card-img-top rounded" alt="Placeholder Image" />
+                        }
                     }
 
                     else
 
                     {
-                        <img src="http://placehold.co/500x600/png" class="img-fluid rounded" />
+                        <img src="http://placehold.co/500x600/png" class="card-img-top rounded" alt="Placeholder Image" />
                     }
                 </div>
                 <div class="col-12 col-lg-6">
@@ -88,7 +69,7 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span>
-                                        <strong>@chapter.ChapterId. @chapter.Title</strong> - @chapter.Content
+                                        <strong>@chapter.ChapterId. @chapter.Title</strong> - >@Html.Raw(@chapter.Content)
                                     </span>
                                     <a asp-action="ViewChapter" asp-route-id="@chapter.ChapterId" class="btn btn-outline-secondary btn-sm">View</a>
                                 </li>
@@ -101,11 +82,21 @@
                             <li class="list-group-item">No chapters available for this course.</li>
                         }
                     </ul>
-
                 </div>
             </div>
             <!-- End Chapters Section -->
-
         </div>
     </div>
 </div>
+
+@section style {
+    <style>
+        /* Stiluri pentru imagini */
+        .card-img-top {
+            width: 100%;
+            height: 300px; /* Ajustează înălțimea dorită */
+            object-fit: cover; /* Asigură că imaginile se potrivesc în container */
+            border-radius: 8px; /* Rotunjeste colțurile imaginilor */
+        }
+    </style>
+}

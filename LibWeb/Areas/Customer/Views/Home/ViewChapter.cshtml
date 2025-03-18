@@ -1,0 +1,13 @@
+﻿@model Lib.Models.Chapter
+
+<div class="container mt-5">
+    <h2 class="text-uppercase">@Model.Title</h2>
+    <p><strong>Course: </strong>@Model.Course.Title</p>
+    <p class="lead">@Html.Raw(Model.Content)</p> <!-- Display chapter content -->
+
+    <div class="mt-4">
+        <a href="@Url.Action("Details", "Home", new { courseId = Model.Course.CourseId })" class="btn btn-outline-primary">
+            Back to Course Details
+        </a>
+    </div>
+</div>

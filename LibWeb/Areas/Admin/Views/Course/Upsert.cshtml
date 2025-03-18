@@ -14,8 +14,6 @@
             <input asp-for="Course.CourseId" hidden />
             <input type="hidden" asp-for="Course.Chapters[0].CourseId" />
 
-            @* The CourseId is used to distinguish between create or update actions *@
-
             <div class="row">
                 <div class="col-10">
                     <div class="border p-3">
@@ -45,10 +43,8 @@
 
                         <div id="chapterSection">
                             @if (Model.Course.Chapters != null && Model.Course.Chapters.Count > 0)
-
                             {
                                 @for (int i = 0; i < Model.Course.Chapters.Count; i++)
-
                                 {
                                     <div class="chapter-container mb-3">
                                         <input name="Course.Chapters[@i].CourseId" type="hidden" value="@Model.Course.CourseId" />
@@ -68,11 +64,8 @@
                                     </div>
                                 }
                             }
-
                             else
-
                             {
-                                <!-- Render a default chapter input if no chapters exist -->
                                 <div class="chapter-container mb-3">
                                     <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" />
                                     <div class="form-floating py-2 col-12">
@@ -98,13 +91,10 @@
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
                                 @if (Model.Course.CourseId != 0)
-
                                 {
                                     <button type="submit" class="btn btn-primary form-control">Update</button>
                                 }
-
                                 else
-
                                 {
                                     <button type="submit" class="btn btn-primary form-control">Create</button>
                                 }
@@ -120,21 +110,16 @@
 
                 <div class="col-2">
                     @if (Model.Course.CourseImages != null)
-
                     {
-
                         foreach (var image in Model.Course.CourseImages)
-
                         {
                             <div class="border p-1 m-2 text-center">
-                                <img src="@image.ImageUrl" width="100%"
-                                     style="border-radius:5px; border:1px solid #bbb9b9" />
+                                <img src="@image.ImageUrl" class="img-fluid" style="border-radius:5px; border:1px solid #bbb9b9" />
                                 <a asp-action="DeleteImage" class="btn btn-danger" asp-route-imageId="@image.Id">
                                     <i class="bi bi-trash-fill"></i> Delete
                                 </a>
                             </div>
                         }
-
                     }
                 </div>
             </div>
@@ -143,6 +128,9 @@
 
     </div>
 </div>
+
+
+
 
 @section scripts{
 

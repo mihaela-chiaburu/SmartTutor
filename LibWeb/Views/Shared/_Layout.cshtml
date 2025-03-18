@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css" />
+    @RenderSection("style", required: false)
 </head>
 <body>
     <header>
@@ -32,7 +33,7 @@
                         </li>
                        
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">Manage Progress (not working rn)</a>
+                            <a class="nav-link" asp-area="Admin" asp-controller="User" asp-action="Progress">Manage Progress (not working rn)</a>
                         </li>
                         @if (User.IsInRole(SD.Role_Admin))
                         {
@@ -60,7 +61,7 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="Course" asp-action="Index">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Course" asp-action="Upsert">
                                 Add Course
                             </a>
                         </li>

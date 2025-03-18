@@ -40,7 +40,7 @@ namespace SmartTutor.Areas.Admin.Controllers
             try
             {
                 // Clear and specific AI prompt
-               /* var prompt = $"You'll receive a chapter title as input. Your task is to write a short, clear, and structured chapter on this topic. " +
+               /*var prompt = $"You'll receive a chapter title as input. Your task is to write a short, clear, and structured chapter on this topic. " +
                              $"Avoid any introductory phrases. Go straight to the point and provide valuable, detailed information. " +
                              $"The title is: \"{request.Title}\". Write the chapter content now.";*/
 

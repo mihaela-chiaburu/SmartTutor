@@ -44,7 +44,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Details(int courseId)
         {
-            Course course = _unitOfWork.Course.Get(u => u.CourseId == courseId, includeProperties: "Category,Chapters");
+            Course course = _unitOfWork.Course.Get(u => u.CourseId == courseId, includeProperties: "Category,Chapters,CourseImages");
 
             if (course == null)
             {
@@ -53,6 +53,20 @@ namespace SmartTutor.Areas.Customer.Controllers
 
             return View(course);
         }
+
+        public IActionResult ViewChapter(int id)
+        {
+            // Fetch the chapter based on the provided chapterId (id)
+            var chapter = _unitOfWork.Chapter.Get(c => c.ChapterId == id, includeProperties: "Course");
+
+            if (chapter == null)
+            {
+                return NotFound(); // If chapter doesn't exist, return 404
+            }
+
+            return View(chapter); // Pass the chapter to the View
+        }
+
 
         public IActionResult Privacy()
         {
