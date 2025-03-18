@@ -26,12 +26,14 @@ namespace Lib.Models
         [ValidateNever]
         public CourseCategory Category { get; set; }
 
-        public string? CreatedByUserId { get; set; }  // Make this nullable
+        public string? CreatedByUserId { get; set; } 
 
         [ForeignKey("CreatedByUserId")]
-        public ApplicationUser? CreatedBy { get; set; }  // Make the navigation property nullable
+        public ApplicationUser? CreatedBy { get; set; }  
         [ValidateNever]
         public List<CourseImage> CourseImages { get; set; }
-        public List<Chapter> Chapters { get; set; } // Add this line
+        public List<Chapter> Chapters { get; set; }
+
+        public List<Quiz> Quizzes { get; set; }
     }
 }

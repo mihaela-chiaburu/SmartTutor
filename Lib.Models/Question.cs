@@ -17,6 +17,7 @@ namespace Lib.Models
         public int QuizId { get; set; }
         [ForeignKey("QuizId")]
         public Quiz Quiz { get; set; }
+        public List<Answer> Answers { get; set; }
     }
 
 }
