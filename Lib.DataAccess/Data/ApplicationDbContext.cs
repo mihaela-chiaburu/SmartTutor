@@ -27,6 +27,19 @@ namespace Lib.DataAccess.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Disable cascading delete for UserId and CourseId
+            modelBuilder.Entity<UserProgress>()
+                .HasOne(up => up.User)
+                .WithMany()
+                .HasForeignKey(up => up.UserId)
+                .OnDelete(DeleteBehavior.NoAction);  // Disable cascading delete for UserId
+
+            modelBuilder.Entity<UserProgress>()
+                .HasOne(up => up.Course)
+                .WithMany()
+                .HasForeignKey(up => up.CourseId)
+                .OnDelete(DeleteBehavior.NoAction);  // Disable cascading delete for CourseId
+
             // Adding categories
             modelBuilder.Entity<CourseCategory>().HasData(
                 new CourseCategory { CourseCategoryId = 1, Name = "Programming", DisplayOrder = 1 },
@@ -42,7 +55,7 @@ namespace Lib.DataAccess.Data
                     Title = "C# for Beginners",
                     Description = "Learn the basics of C# programming with this beginner-friendly course.",
                     CategoryId = 1,
-                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
+                    CreatedByUserId = null
                 },
                 new Course
                 {
@@ -50,7 +63,7 @@ namespace Lib.DataAccess.Data
                     Title = "Startup Business Strategies",
                     Description = "Explore key strategies for building a successful startup.",
                     CategoryId = 2,
-                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
+                    CreatedByUserId = null
                 },
                 new Course
                 {
@@ -58,7 +71,7 @@ namespace Lib.DataAccess.Data
                     Title = "Graphic Design Essentials",
                     Description = "Master the fundamentals of graphic design with this hands-on course.",
                     CategoryId = 3,
-                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
+                    CreatedByUserId = null
                 }
             );
         }

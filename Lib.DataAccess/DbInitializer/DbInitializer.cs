@@ -54,7 +54,6 @@ namespace Lib.DataAccess.DbInitializer
                     Email = "admin@dotnetmastery.com",
                     Name = "Misha",
                     PhoneNumber = "1234567890",
-                    Country = "Moldova",
                 }, "Admin123*").GetAwaiter().GetResult();
 
                 ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@dotnetmastery.com");

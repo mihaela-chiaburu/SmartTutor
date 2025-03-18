@@ -26,10 +26,10 @@ namespace Lib.Models
         [ValidateNever]
         public CourseCategory Category { get; set; }
 
-        public string CreatedByUserId { get; set; }
+        public string? CreatedByUserId { get; set; }  // Make this nullable
 
         [ForeignKey("CreatedByUserId")]
-        public ApplicationUser CreatedBy { get; set; }
+        public ApplicationUser? CreatedBy { get; set; }  // Make the navigation property nullable
         [ValidateNever]
         public List<CourseImage> CourseImages { get; set; }
     }
