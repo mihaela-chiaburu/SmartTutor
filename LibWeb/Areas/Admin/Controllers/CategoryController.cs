@@ -19,7 +19,8 @@ namespace SmartTutor.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            List<CourseCategory> objCategoryList = _unitOfWork.Category.GetAll().ToList();
+            // Fetch CourseCategory entities
+            List<CourseCategory> objCategoryList = _unitOfWork.CourseCategory.GetAll().ToList();
             return View(objCategoryList);
         }
 
@@ -38,9 +39,9 @@ namespace SmartTutor.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                _unitOfWork.Category.Add(obj);
+                _unitOfWork.CourseCategory.Add(obj); // Use CourseCategory, not Category
                 _unitOfWork.Save();
-                TempData["success"] = "Category created successfuly";
+                TempData["success"] = "Category created successfully";
                 return RedirectToAction("Index");
             }
             return View();
@@ -52,9 +53,7 @@ namespace SmartTutor.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            CourseCategory? categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
-            //Category? categoryFromDb1 = _db.Categories.FirstOrDefault(u=>u.Id==id);
-            //Category? categoryFromDb2 = _db.Categories.Where(u => u.Id == id).FirstOrDefault();
+            CourseCategory? categoryFromDb = _unitOfWork.CourseCategory.Get(u => u.CourseCategoryId == id);
             if (categoryFromDb == null)
             {
                 return NotFound();
@@ -67,20 +66,21 @@ namespace SmartTutor.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Category.Update(obj);
+                _unitOfWork.CourseCategory.Update(obj); // Use CourseCategory, not Category
                 _unitOfWork.Save();
-                TempData["success"] = "Category updated successfuly";
+                TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
             }
             return View();
         }
+
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
-            CourseCategory? categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
+            CourseCategory? categoryFromDb = _unitOfWork.CourseCategory.Get(u => u.CourseCategoryId == id);
 
             if (categoryFromDb == null)
             {
@@ -90,16 +90,16 @@ namespace SmartTutor.Areas.Admin.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DetelePOST(int? id)
+        public IActionResult DeleteConfirmed(int? id)
         {
-            CourseCategory? obj = _unitOfWork.Category.Get(u => u.Id == id);
+            CourseCategory? obj = _unitOfWork.CourseCategory.Get(u => u.CourseCategoryId == id);
             if (obj == null)
             {
                 return NotFound();
             }
-            _unitOfWork.Category.Remove(obj);
+            _unitOfWork.CourseCategory.Remove(obj);
             _unitOfWork.Save();
-            TempData["success"] = "Category deleted successfuly";
+            TempData["success"] = "Category deleted successfully";
             return RedirectToAction("Index");
         }
     }

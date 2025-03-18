@@ -1,10 +1,7 @@
 using Lib.DataAccess.Repository.IRepository;
 using Lib.Models;
-using Lib.Utility;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Security.Claims;
 
 namespace SmartTutor.Areas.Customer.Controllers
 {
@@ -22,50 +19,22 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            
-            IEnumerable<Course> productList = _unitOfWork.Product.GetAll(includeProperties: "Category,ProductImages");
-            return View(productList);
+            // Fetch only 3 courses
+            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category")
+                                                .Take(3);
+            return View(courseList);
         }
 
-        public IActionResult Details(int productId)
+        public IActionResult Details(int courseId)
         {
-            ShoppingCart cart = new()
+            Course course = _unitOfWork.Course.Get(u => u.CourseId == courseId, includeProperties: "Category");
+
+            if (course == null)
             {
-                Product = _unitOfWork.Product.Get(u => u.Id == productId, includeProperties: "Category,ProductImages"),
-                Count = 1,
-                ProductId = productId
-            };
-            return View(cart);
-        }
-
-        [HttpPost]
-        [Authorize]
-        public IActionResult Details(ShoppingCart shoppingCart)
-        {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-            shoppingCart.ApplicationUserId = userId;
-
-            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.Get(u=>u.ApplicationUserId == userId &&
-            u.ProductId==shoppingCart.ProductId);
-
-            if (cartFromDb != null)
-            {
-                //shopping cart exists
-                cartFromDb.Count += shoppingCart.Count;
-                _unitOfWork.ShoppingCart.Update(cartFromDb);
-                _unitOfWork.Save();
+                return NotFound();
             }
-            else
-            {
-                //add cart record
-                _unitOfWork.ShoppingCart.Add(shoppingCart);
-                _unitOfWork.Save();
-                HttpContext.Session.SetInt32(SD.SessionCart,
-                    _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count());
-            }
-            TempData["success"] = "Cart updated succesfully";
-            return RedirectToAction(nameof(Index));
+
+            return View(course);
         }
 
         public IActionResult Privacy()

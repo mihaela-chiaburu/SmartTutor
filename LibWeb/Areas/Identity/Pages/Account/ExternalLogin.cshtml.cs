@@ -165,16 +165,12 @@ namespace SmartTutor.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                user.StreetAddress = Input.StreetAddress;
-                user.City = Input.City;
-                user.State = Input.State;
-                user.PostalCode = Input.PostalCode;
                 user.Name = Input.Name;
 
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user,SD.Role_Customer);
+                    await _userManager.AddToRoleAsync(user,SD.Role_Student);
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {

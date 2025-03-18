@@ -19,7 +19,7 @@ namespace Lib.DataAccess.Repository
 
         public void Update(Course obj)
         {
-            var objFromDb = _db.Courses.FirstOrDefault(u=>u.Id == obj.Id);
+            var objFromDb = _db.Courses.FirstOrDefault(u=>u.CourseId == obj.CourseId);
             if (objFromDb != null)
             {
                 objFromDb.Title = obj.Title;

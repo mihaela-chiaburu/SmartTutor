@@ -137,11 +137,6 @@ namespace SmartTutor.Areas.Identity.Pages.Account
                 {
                     Text = i,
                     Value = i
-                }),
-                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
                 })
             };
 
@@ -159,17 +154,8 @@ namespace SmartTutor.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                user.StreetAddress = Input.StreetAddress;
-                user.City = Input.City;
                 user.Name = Input.Name;
-                user.State = Input.State;
-                user.PostalCode = Input.PostalCode;
                 user.PhoneNumber = Input.PhoneNumber;
-
-                if(Input.Role == SD.Role_Company)
-                {
-                    user.CompanyId = Input.CompanyId;
-                }
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -183,7 +169,7 @@ namespace SmartTutor.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+                        await _userManager.AddToRoleAsync(user, SD.Role_Student);
                     }
 
                     var userId = await _userManager.GetUserIdAsync(user);

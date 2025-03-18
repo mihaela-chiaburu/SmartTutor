@@ -1,0 +1,117 @@
+﻿@model CourseVM
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">@(Model.Course.CourseId != 0 ? "Update" : "Create") Course</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+
+        <form method="post" class="row" enctype="multipart/form-data">
+            <input asp-for="Course.CourseId" hidden />
+            @* The CourseId is used to distinguish between create or update actions *@
+
+            <div class="row">
+                <div class="col-10">
+                    <div class="border p-3">
+                        <div class="form-floating py-2 col-12">
+                            <input asp-for="Course.Title" class="form-control border-0 shadow" />
+                            <label asp-for="Course.Title" class="ms-2"></label>
+                            <span asp-validation-for="Course.Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="py-2 col-12">
+                            <label asp-for="Course.Description" class="ms-2 text-muted"></label>
+                            <textarea asp-for="Course.Description" class="form-control border-0 shadow"></textarea>
+                        </div>
+
+                        <div class="form-floating py-2 col-12">
+                            <select asp-for="Course.CategoryId" asp-items="@Model.CategoryList" class="form-select border-0 shadow">
+                                <option disabled selected>--Select Category--</option>
+                            </select>
+                            <label asp-for="Course.CategoryId" class="ms-2"></label>
+                            <span asp-validation-for="Course.CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating py-2 col-12">
+                            <input type="file" name="files" class="form-control border-0 shadow" multiple />
+                            <label asp-for="Course.CourseImages" class="ms-2"></label>
+                        </div>
+
+                        <div class="row pt-2">
+                            <div class="col-6 col-md-3">
+                                @if (Model.Course.CourseId != 0)
+
+                                {
+                                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                                }
+
+                                else
+
+                                {
+                                    <button type="submit" class="btn btn-primary form-control">Create</button>
+                                }
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <a asp-controller="Course" asp-action="Index" class="btn btn-outline-primary border form-control">
+                                    Back To List
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    @if (Model.Course.CourseImages != null)
+
+                    {
+
+                        foreach (var image in Model.Course.CourseImages)
+
+                        {
+                            <div class="border p-1 m-2 text-center">
+                                <img src="@image.ImageUrl" width="100%"
+                                     style="border-radius:5px; border:1px solid #bbb9b9" />
+                                <a asp-action="DeleteImage" class="btn btn-danger" asp-route-imageId="@image.Id">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </a>
+                            </div>
+                        }
+
+                    }
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+
+@section scripts{
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            apiKey: 'dj4nwfgxl573pnjczuwgs83yetc0vrtwlrr7pshh1ax8jok0',
+            plugins: [
+                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'lists', 'table', 'visualblocks', 'wordcount',
+                'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate',
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent ',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+        });
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

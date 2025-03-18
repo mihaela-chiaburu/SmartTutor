@@ -6,76 +6,78 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.IO;
+using System.Linq;
+using System;
 
 namespace SmartTutor.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
-    public class ProductController : Controller
+    public class CourseController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+
+        public CourseController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
-        } 
+        }
 
         public IActionResult Index()
         {
-            List<Course> objProductList = _unitOfWork.Product.GetAll(includeProperties:"Category").ToList();
-            return View(objProductList);
+            List<Course> objCourseList = _unitOfWork.Course.GetAll(includeProperties: "Category").ToList();
+            return View(objCourseList);
         }
 
         public IActionResult Upsert(int? id)
         {
-            CourseVM productVM = new()
+            CourseVM courseVM = new()
             {
-                CategoryList = _unitOfWork.Category.
-                GetAll().Select(u => new SelectListItem
+                CategoryList = _unitOfWork.CourseCategory.GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
-                    Value = u.Id.ToString()
+                    Value = u.CourseCategoryId.ToString()
                 }),
-                Product = new Course()
+                Course = new Course()
             };
-            if(id==null || id == 0)
+
+            if (id == null || id == 0)
             {
-                return View(productVM);
+                return View(courseVM);
             }
             else
             {
-                productVM.Product = _unitOfWork.Product.Get(u=>u.Id==id, includeProperties:"ProductImages");
-                return View(productVM); 
+                courseVM.Course = _unitOfWork.Course.Get(u => u.CourseId == id, includeProperties: "CourseImages");
+                return View(courseVM);
             }
         }
 
         [HttpPost]
-        public IActionResult Upsert(CourseVM productVM, List<IFormFile> files)
+        public IActionResult Upsert(CourseVM courseVM, List<IFormFile> files)
         {
             if (ModelState.IsValid)
             {
-                if (productVM.Product.Id == 0)
+                if (courseVM.Course.CourseId == 0)
                 {
-                    _unitOfWork.Product.Add(productVM.Product);
+                    _unitOfWork.Course.Add(courseVM.Course);  // Add new course
                 }
                 else
                 {
-                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Course.Update(courseVM.Course);  // Update existing course
                 }
 
                 _unitOfWork.Save();
 
-
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
-                if (files != null)
+                if (files != null && files.Count > 0)
                 {
-
                     foreach (IFormFile file in files)
                     {
                         string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                        string productPath = @"images\products\product-" + productVM.Product.Id;
-                        string finalPath = Path.Combine(wwwRootPath, productPath);
+                        string coursePath = @"images\courses\course-" + courseVM.Course.CourseId;
+                        string finalPath = Path.Combine(wwwRootPath, coursePath);
 
                         if (!Directory.Exists(finalPath))
                             Directory.CreateDirectory(finalPath);
@@ -85,42 +87,41 @@ namespace SmartTutor.Areas.Admin.Controllers
                             file.CopyTo(fileStream);
                         }
 
-                        CourseImage productImage = new()
+                        CourseImage courseImage = new()
                         {
-                            ImageUrl = @"\" + productPath + @"\" + fileName,
-                            ProductId = productVM.Product.Id,
+                            ImageUrl = @"\" + coursePath + @"\" + fileName,
+                            CourseId = courseVM.Course.CourseId,
                         };
 
-                        if (productVM.Product.ProductImages == null)
-                            productVM.Product.ProductImages = new List<CourseImage>();
+                        if (courseVM.Course.CourseImages == null)
+                            courseVM.Course.CourseImages = new List<CourseImage>();
 
-                        productVM.Product.ProductImages.Add(productImage);
-
+                        courseVM.Course.CourseImages.Add(courseImage);
                     }
 
-                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Course.Update(courseVM.Course);
                     _unitOfWork.Save();
                 }
 
-
-                TempData["success"] = "Product created/updated successfully";
+                TempData["success"] = "Course created/updated successfully";
                 return RedirectToAction("Index");
             }
             else
             {
-                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
+                courseVM.CategoryList = _unitOfWork.CourseCategory.GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
-                    Value = u.Id.ToString()
+                    Value = u.CourseCategoryId.ToString()
                 });
-                return View(productVM);
+                return View(courseVM);
             }
         }
 
         public IActionResult DeleteImage(int imageId)
         {
-            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
-            int productId = imageToBeDeleted.ProductId;
+            var imageToBeDeleted = _unitOfWork.CourseImage.Get(u => u.Id == imageId);
+            int courseId = imageToBeDeleted.CourseId;
+
             if (imageToBeDeleted != null)
             {
                 if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
@@ -131,13 +132,14 @@ namespace SmartTutor.Areas.Admin.Controllers
                         System.IO.File.Delete(oldImagePath);
                     }
                 }
-                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+
+                _unitOfWork.CourseImage.Remove(imageToBeDeleted);
                 _unitOfWork.Save();
 
-                TempData["success"] = "Deleted successfully";
+                TempData["success"] = "Image deleted successfully";
             }
 
-            return RedirectToAction(nameof(Upsert), new {id = productId });
+            return RedirectToAction(nameof(Upsert), new { id = courseId });
         }
 
         #region API CALLS
@@ -145,21 +147,22 @@ namespace SmartTutor.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<Course> objProductList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
-            return Json(new { data = objProductList});
+            List<Course> objCourseList = _unitOfWork.Course.GetAll(includeProperties: "Category").ToList();
+            return Json(new { data = objCourseList });
         }
 
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            var productToBeDeleted = _unitOfWork.Product.Get(u=>u.Id == id);
-            if (productToBeDeleted == null)
+            var courseToBeDeleted = _unitOfWork.Course.Get(u => u.CourseId == id);
+            if (courseToBeDeleted == null)
             {
-                return Json(new { success = false, message = "Error while deleting"});
+                return Json(new { success = false, message = "Error while deleting course" });
             }
 
-            string productPath = @"images\products\product-" + id;
-            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, productPath);
+            // Delete course images
+            string coursePath = @"images\courses\course-" + id;
+            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, coursePath);
 
             if (Directory.Exists(finalPath))
             {
@@ -170,13 +173,13 @@ namespace SmartTutor.Areas.Admin.Controllers
                 }
                 Directory.Delete(finalPath);
             }
-            
-            _unitOfWork.Product.Remove(productToBeDeleted);
+
+            // Remove the course from database
+            _unitOfWork.Course.Remove(courseToBeDeleted);
             _unitOfWork.Save();
 
-            return Json(new { success = true, message = "Delete Successful" });
+            return Json(new { success = true, message = "Course deleted successfully" });
         }
-
 
         #endregion
     }

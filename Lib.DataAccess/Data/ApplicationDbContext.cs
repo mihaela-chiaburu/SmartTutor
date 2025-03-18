@@ -27,32 +27,40 @@ namespace Lib.DataAccess.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Adding categories
             modelBuilder.Entity<CourseCategory>().HasData(
-                new CourseCategory { CourseCategoryId = 1, Name = "Action", DisplayOrder = 1 },
-                new CourseCategory { CourseCategoryId = 2, Name = "SciFi", DisplayOrder = 2 },
-                new CourseCategory { CourseCategoryId = 3, Name = "History", DisplayOrder = 3 }
-                );
+                new CourseCategory { CourseCategoryId = 1, Name = "Programming", DisplayOrder = 1 },
+                new CourseCategory { CourseCategoryId = 2, Name = "Business", DisplayOrder = 2 },
+                new CourseCategory { CourseCategoryId = 3, Name = "Design", DisplayOrder = 3 }
+            );
 
+            // Adding dummy courses
             modelBuilder.Entity<Course>().HasData(
                 new Course
                 {
                     CourseId = 1,
-                    Title = "Fortune of Time",
-                    CategoryId = 1
+                    Title = "C# for Beginners",
+                    Description = "Learn the basics of C# programming with this beginner-friendly course.",
+                    CategoryId = 1,
+                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
                 },
                 new Course
                 {
                     CourseId = 2,
-                    Title = "Fortune of Time",
-                    CategoryId = 1
+                    Title = "Startup Business Strategies",
+                    Description = "Explore key strategies for building a successful startup.",
+                    CategoryId = 2,
+                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
                 },
                 new Course
                 {
                     CourseId = 3,
-                    Title = "Fortune of Time",
-                    CategoryId = 1
+                    Title = "Graphic Design Essentials",
+                    Description = "Master the fundamentals of graphic design with this hands-on course.",
+                    CategoryId = 3,
+                    CreatedByUserId = "6cd7510b-1cae-49c8-bb4f-9922ca24b874"
                 }
-                );
+            );
         }
     }
 }
