@@ -16,6 +16,7 @@ namespace Lib.DataAccess.Repository.IRepository
         IQuizRepository Quiz { get; }
         IQuestionRespository Question { get; }
         IAnswerRepository Answer { get; }
+        IChapterRepository Chapter { get; }
         void Save();
     }
 }

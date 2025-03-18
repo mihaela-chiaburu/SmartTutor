@@ -1,29 +1,36 @@
 ﻿@model IEnumerable<Course>
 
+@functions {
+    public string GetShortDescription(string description)
+    {
+        if (string.IsNullOrEmpty(description)) return string.Empty;
+        var words = description.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var shortDescription = string.Join(" ", words.Take(20));
+        return shortDescription + (words.Length > 20 ? "..." : string.Empty);
+    }
+}
+
 <div class="row pb-3">
     @foreach (var course in Model)
-
     {
         <div class="col-lg-4 col-sm-12">
             <div class="row p-2">
                 <div class="col-12 p-1">
                     <div class="card border-0 p-3 shadow border-top border-5 rounded">
                         @if (course.CourseImages != null && course.CourseImages.Any())
-
                         {
-                            <img src="@course.CourseImages.FirstOrDefault().ImageUrl" class="card-img-top rounded" />
+                            <img src="@course.CourseImages.FirstOrDefault()?.ImageUrl ?? " http: //placehold.co/500x600/png"" class="card-img-top rounded" />
                         }
-
                         else
-
                         {
                             <img src="http://placehold.co/500x600/png" class="card-img-top rounded" />
                         }
-
                         <div class="card-body pb-0">
                             <div class="text-center">
                                 <p class="card-title h5 text-dark opacity-75 text-uppercase">@course.Title</p>
-                                <p class="text-muted">@course.Description</p>
+                                <p class="text-muted">
+                                    @Html.Raw(GetShortDescription(course.Description))
+                                </p>
                             </div>
                         </div>
                         <div class="text-center p-2">

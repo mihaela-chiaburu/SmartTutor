@@ -25,7 +25,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Details(int courseId)
         {
-            Course course = _unitOfWork.Course.Get(u => u.CourseId == courseId, includeProperties: "Category");
+            Course course = _unitOfWork.Course.Get(u => u.CourseId == courseId, includeProperties: "Category,Chapters");
 
             if (course == null)
             {

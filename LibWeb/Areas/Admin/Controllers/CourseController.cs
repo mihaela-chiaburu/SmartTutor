@@ -48,13 +48,50 @@ namespace SmartTutor.Areas.Admin.Controllers
                 courseVM.Course = _unitOfWork.Course.Get(u => u.CourseId == id, includeProperties: "CourseImages,Chapters");
             }
 
+            // Ensure Chapters is never null and contains at least one chapter
+            if (courseVM.Course.Chapters == null || courseVM.Course.Chapters.Count == 0)
+            {
+                courseVM.Course.Chapters = new List<Chapter> { new Chapter() }; // Add a default chapter
+            }
+
             return View(courseVM);
         }
+
+
 
 
         [HttpPost]
         public IActionResult Upsert(CourseVM courseVM, List<IFormFile> files)
         {
+            if (!ModelState.IsValid)
+            {
+                // Log errors to understand what is failing
+                var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                                       .Select(x => new { x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
+                                       .ToList();
+
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Field: {error.Key}");
+                    foreach (var errorMessage in error.Errors)
+                    {
+                        Console.WriteLine($"Error: {errorMessage}");
+                    }
+                }
+
+                TempData["error"] = "Validation failed. Please check all required fields.";
+
+                // Reload Category List for dropdown
+                courseVM.CategoryList = _unitOfWork.CourseCategory.GetAll()
+                    .Select(u => new SelectListItem
+                    {
+                        Text = u.Name,
+                        Value = u.CourseCategoryId.ToString()
+                    });
+
+                return View(courseVM);
+            }
+
             if (ModelState.IsValid)
             {
                 if (courseVM.Course.CourseId == 0)
@@ -64,11 +101,15 @@ namespace SmartTutor.Areas.Admin.Controllers
                 else
                 {
                     _unitOfWork.Course.Update(courseVM.Course);  // Update existing course
+
                 }
 
                 _unitOfWork.Save();
 
+                // Save images (course images)
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+                // Process course images
                 if (files != null && files.Count > 0)
                 {
                     foreach (IFormFile file in files)
@@ -101,6 +142,27 @@ namespace SmartTutor.Areas.Admin.Controllers
                     _unitOfWork.Save();
                 }
 
+                // Handle Chapters (without image handling)
+                if (courseVM.Course.Chapters != null)
+                {
+                    foreach (var chapter in courseVM.Course.Chapters)
+                    {
+                        if (chapter.ChapterId == 0)
+                        {
+                            // New chapter
+                            chapter.CourseId = courseVM.Course.CourseId; // Associate with the course
+                            _unitOfWork.Chapter.Add(chapter);
+                        }
+                        else
+                        {
+                            // Existing chapter
+                            _unitOfWork.Chapter.Update(chapter);
+                        }
+                    }
+                }
+
+                _unitOfWork.Save();
+
                 TempData["success"] = "Course created/updated successfully";
                 return RedirectToAction("Index");
             }
@@ -114,6 +176,7 @@ namespace SmartTutor.Areas.Admin.Controllers
                 return View(courseVM);
             }
         }
+
 
         public IActionResult DeleteImage(int imageId)
         {

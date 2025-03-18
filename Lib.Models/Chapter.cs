@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Lib.Models
 {
@@ -21,6 +22,7 @@ namespace Lib.Models
         public int CourseId { get; set; }
 
         [ForeignKey("CourseId")]
+        [ValidateNever]
         public Course Course { get; set; }
     }
 }

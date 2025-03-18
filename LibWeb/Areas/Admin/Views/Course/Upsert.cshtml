@@ -12,6 +12,8 @@
 
         <form method="post" class="row" enctype="multipart/form-data">
             <input asp-for="Course.CourseId" hidden />
+            <input type="hidden" asp-for="Course.Chapters[0].CourseId" />
+
             @* The CourseId is used to distinguish between create or update actions *@
 
             <div class="row">
@@ -40,6 +42,52 @@
                             <input type="file" name="files" class="form-control border-0 shadow" multiple />
                             <label asp-for="Course.CourseImages" class="ms-2"></label>
                         </div>
+
+                       <div id="chapterSection">
+                            @if (Model.Course.Chapters != null && Model.Course.Chapters.Count > 0)
+                            {
+                                @for (int i = 0; i < Model.Course.Chapters.Count; i++)
+                                {
+                                    <div class="chapter-container mb-3">
+                                        <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" />  <!-- Add this line -->
+                                        <div class="form-floating py-2 col-12">
+                                            <input asp-for="Course.Chapters[i].Title" class="form-control border-0 shadow" />
+                                            <label asp-for="Course.Chapters[i].Title" class="ms-2">Chapter Title</label>
+                                            <span asp-validation-for="Course.Chapters[i].Title" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="py-2 col-12">
+                                            <label asp-for="Course.Chapters[i].Content" class="ms-2 text-muted">Chapter Content</label>
+                                            <textarea asp-for="Course.Chapters[i].Content" class="form-control border-0 shadow"></textarea>
+                                            <span asp-validation-for="Course.Chapters[i].Content" class="text-danger"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="@i">Remove Chapter</button>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <!-- Render a default chapter input if no chapters exist -->
+                                <div class="chapter-container mb-3">
+                                    <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" /> <!-- Add this line -->
+                                    <div class="form-floating py-2 col-12">
+                                        <input asp-for="Course.Chapters[0].Title" class="form-control border-0 shadow" />
+                                        <label asp-for="Course.Chapters[0].Title" class="ms-2">Chapter Title</label>
+                                        <span asp-validation-for="Course.Chapters[0].Title" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="py-2 col-12">
+                                        <label asp-for="Course.Chapters[0].Content" class="ms-2 text-muted">Chapter Content</label>
+                                        <textarea asp-for="Course.Chapters[0].Content" class="form-control border-0 shadow"></textarea>
+                                        <span asp-validation-for="Course.Chapters[0].Content" class="text-danger"></span>
+                                    </div>
+
+                                    <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="0">Remove Chapter</button>
+                                </div>
+                            }
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary mt-3" id="addChapterButton">+ Add Chapter</button>
 
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
@@ -90,6 +138,44 @@
     </div>
 </div>
 
+
+<script>
+    document.getElementById('addChapterButton').addEventListener('click', function () {
+        const chapterSection = document.getElementById('chapterSection');
+        const chapterIndex = chapterSection.querySelectorAll('.chapter-container').length;
+
+        const chapterHTML = `
+            <div class="chapter-container mb-3">
+                <input name="Course.Chapters[${chapterIndex}].ChapterId" type="hidden" value="0" />
+                <input name="Course.Chapters[${chapterIndex}].CourseId" type="hidden" value="@Model.Course.CourseId" /> <!-- Add this line -->
+                <div class="form-floating py-2 col-12">
+                    <input name="Course.Chapters[${chapterIndex}].Title" class="form-control border-0 shadow" />
+                    <label class="ms-2">Chapter Title</label>
+                </div>
+
+                <div class="py-2 col-12">
+                    <label class="ms-2 text-muted">Chapter Content</label>
+                    <textarea name="Course.Chapters[${chapterIndex}].Content" class="form-control border-0 shadow"></textarea>
+                </div>
+
+                <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="${chapterIndex}">Remove Chapter</button>
+            </div>
+        `;
+
+        chapterSection.insertAdjacentHTML('beforeend', chapterHTML);
+
+        document.querySelectorAll('.remove-chapter').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.chapter-container').remove();
+            });
+        });
+    });
+    document.querySelectorAll('.remove-chapter').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.chapter-container').remove();
+        });
+    });
+</script>
 
 
 @section scripts{
