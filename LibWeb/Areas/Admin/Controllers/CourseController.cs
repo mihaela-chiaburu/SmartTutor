@@ -43,16 +43,14 @@ namespace SmartTutor.Areas.Admin.Controllers
                 Course = new Course()
             };
 
-            if (id == null || id == 0)
+            if (id != null && id != 0)
             {
-                return View(courseVM);
+                courseVM.Course = _unitOfWork.Course.Get(u => u.CourseId == id, includeProperties: "CourseImages,Chapters");
             }
-            else
-            {
-                courseVM.Course = _unitOfWork.Course.Get(u => u.CourseId == id, includeProperties: "CourseImages");
-                return View(courseVM);
-            }
+
+            return View(courseVM);
         }
+
 
         [HttpPost]
         public IActionResult Upsert(CourseVM courseVM, List<IFormFile> files)
@@ -151,8 +149,8 @@ namespace SmartTutor.Areas.Admin.Controllers
             return Json(new { data = objCourseList });
         }
 
-        [HttpDelete]
-        public IActionResult Delete(int? id)
+        [HttpPost]
+        public IActionResult Delete(int id)
         {
             var courseToBeDeleted = _unitOfWork.Course.Get(u => u.CourseId == id);
             if (courseToBeDeleted == null)
@@ -161,25 +159,24 @@ namespace SmartTutor.Areas.Admin.Controllers
             }
 
             // Delete course images
-            string coursePath = @"images\courses\course-" + id;
-            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, coursePath);
+            string coursePath = Path.Combine(_webHostEnvironment.WebRootPath, "images/courses/course-" + id);
 
-            if (Directory.Exists(finalPath))
+            if (Directory.Exists(coursePath))
             {
-                string[] filePaths = Directory.GetFiles(finalPath);
-                foreach (string filePath in filePaths)
+                foreach (string filePath in Directory.GetFiles(coursePath))
                 {
                     System.IO.File.Delete(filePath);
                 }
-                Directory.Delete(finalPath);
+                Directory.Delete(coursePath);
             }
 
             // Remove the course from database
             _unitOfWork.Course.Remove(courseToBeDeleted);
             _unitOfWork.Save();
 
-            return Json(new { success = true, message = "Course deleted successfully" });
+            return RedirectToAction("Index"); // Redirect after delete
         }
+
 
         #endregion
     }

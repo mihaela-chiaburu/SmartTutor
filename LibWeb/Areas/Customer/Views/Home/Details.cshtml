@@ -74,6 +74,38 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Chapters Section -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="text-uppercase">Course Chapters</h4>
+                    <ul class="list-group">
+                        @if (Model.Chapters != null && Model.Chapters.Any())
+
+                        {
+                            @foreach (var chapter in Model.Chapters)
+
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong>@chapter.ChapterId. @chapter.Title</strong> - @chapter.Content
+                                    </span>
+                                    <a asp-action="ViewChapter" asp-route-id="@chapter.ChapterId" class="btn btn-outline-secondary btn-sm">View</a>
+                                </li>
+                            }
+                        }
+
+                        else
+
+                        {
+                            <li class="list-group-item">No chapters available for this course.</li>
+                        }
+                    </ul>
+
+                </div>
+            </div>
+            <!-- End Chapters Section -->
+
         </div>
     </div>
 </div>

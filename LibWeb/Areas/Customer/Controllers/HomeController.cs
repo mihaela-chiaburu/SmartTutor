@@ -19,9 +19,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            // Fetch only 3 courses
-            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category")
-                                                .Take(3);
+            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category");
             return View(courseList);
         }
 

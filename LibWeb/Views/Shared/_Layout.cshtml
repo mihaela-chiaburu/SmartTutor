@@ -32,7 +32,7 @@
                         </li>
                        
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">Manage Progress</a>
+                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">Manage Progress (not working rn)</a>
                         </li>
                         @if (User.IsInRole(SD.Role_Admin))
                         {
@@ -46,9 +46,8 @@
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li class="nav-item">
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Courses</a>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Course" asp-action="Index">Courses</a>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li class="nav-item">
                                         <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Create User</a>
@@ -61,7 +60,7 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Course" asp-action="Index">
                                 Add Course
                             </a>
                         </li>

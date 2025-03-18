@@ -17,6 +17,7 @@ namespace Lib.DataAccess.Repository
         public ICourseImageRepository CourseImage { get; private set; } 
         public ICourseCategoryRepository CourseCategory { get; private set; }
         public IApplicationUserRepository ApplicationUser { get; private set; }
+        public IChapterRepository Chapter { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -29,6 +30,7 @@ namespace Lib.DataAccess.Repository
             CourseImage = new CourseImageRepository(_db);
             CourseCategory = new CourseCategoryRepository(_db);
             ApplicationUser = new ApplicationUserRepository(_db);
+            Chapter = new ChapterRepository(_db);
         }
 
         public void Save()

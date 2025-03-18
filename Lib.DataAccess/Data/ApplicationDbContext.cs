@@ -21,7 +21,7 @@ namespace Lib.DataAccess.Data
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<UserProgress> UserProgresses { get; set; }
-
+        public DbSet<Chapter> Chapters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

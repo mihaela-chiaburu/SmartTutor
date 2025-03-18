@@ -32,5 +32,6 @@ namespace Lib.Models
         public ApplicationUser? CreatedBy { get; set; }  // Make the navigation property nullable
         [ValidateNever]
         public List<CourseImage> CourseImages { get; set; }
+        public List<Chapter> Chapters { get; set; } // Add this line
     }
 }
