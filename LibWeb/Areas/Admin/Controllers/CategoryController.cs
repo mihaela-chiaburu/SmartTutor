@@ -19,7 +19,6 @@ namespace SmartTutor.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            // Fetch CourseCategory entities
             List<CourseCategory> objCategoryList = _unitOfWork.CourseCategory.GetAll().ToList();
             return View(objCategoryList);
         }

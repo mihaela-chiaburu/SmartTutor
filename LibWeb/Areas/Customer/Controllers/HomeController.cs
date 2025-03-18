@@ -2,6 +2,8 @@ using Lib.DataAccess.Repository.IRepository;
 using Lib.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SmartTutor.Areas.Customer.Controllers
 {
@@ -17,9 +19,26 @@ namespace SmartTutor.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(List<int> categoryIds)
         {
-            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category,CourseImages");
+            // Fetch all categories for the filter form
+            var categories = _unitOfWork.CourseCategory.GetAll().ToList();
+            ViewBag.Categories = categories;
+
+            // Fetch courses based on selected categories
+            IEnumerable<Course> courseList;
+            if (categoryIds != null && categoryIds.Any())
+            {
+                courseList = _unitOfWork.Course.GetAll(
+                    filter: c => categoryIds.Contains(c.CategoryId),
+                    includeProperties: "Category,CourseImages"
+                );
+            }
+            else
+            {
+                courseList = _unitOfWork.Course.GetAll(includeProperties: "Category,CourseImages");
+            }
+
             return View(courseList);
         }
 

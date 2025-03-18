@@ -43,42 +43,48 @@
                             <label asp-for="Course.CourseImages" class="ms-2"></label>
                         </div>
 
-                       <div id="chapterSection">
+                        <div id="chapterSection">
                             @if (Model.Course.Chapters != null && Model.Course.Chapters.Count > 0)
+
                             {
                                 @for (int i = 0; i < Model.Course.Chapters.Count; i++)
+
                                 {
                                     <div class="chapter-container mb-3">
-                                        <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" />  <!-- Add this line -->
+                                        <input name="Course.Chapters[@i].CourseId" type="hidden" value="@Model.Course.CourseId" />
                                         <div class="form-floating py-2 col-12">
-                                            <input asp-for="Course.Chapters[i].Title" class="form-control border-0 shadow" />
+                                            <input asp-for="Course.Chapters[i].Title" class="form-control border-0 shadow chapter-title" />
                                             <label asp-for="Course.Chapters[i].Title" class="ms-2">Chapter Title</label>
                                             <span asp-validation-for="Course.Chapters[i].Title" class="text-danger"></span>
+                                            <button type="button" class="btn btn-outline-secondary mt-2 generate-content" data-index="@i">Generate Content</button>
                                         </div>
 
                                         <div class="py-2 col-12">
                                             <label asp-for="Course.Chapters[i].Content" class="ms-2 text-muted">Chapter Content</label>
-                                            <textarea asp-for="Course.Chapters[i].Content" class="form-control border-0 shadow"></textarea>
+                                            <textarea asp-for="Course.Chapters[i].Content" class="form-control border-0 shadow chapter-content" id="Course_Chapters_@(i)__Content"></textarea>
                                             <span asp-validation-for="Course.Chapters[i].Content" class="text-danger"></span>
                                         </div>
                                         <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="@i">Remove Chapter</button>
                                     </div>
                                 }
                             }
+
                             else
+
                             {
                                 <!-- Render a default chapter input if no chapters exist -->
                                 <div class="chapter-container mb-3">
-                                    <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" /> <!-- Add this line -->
+                                    <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" />
                                     <div class="form-floating py-2 col-12">
-                                        <input asp-for="Course.Chapters[0].Title" class="form-control border-0 shadow" />
+                                        <input asp-for="Course.Chapters[0].Title" class="form-control border-0 shadow chapter-title" />
                                         <label asp-for="Course.Chapters[0].Title" class="ms-2">Chapter Title</label>
                                         <span asp-validation-for="Course.Chapters[0].Title" class="text-danger"></span>
+                                        <button type="button" class="btn btn-outline-secondary mt-2 generate-content" data-index="0">Generate Content</button>
                                     </div>
 
                                     <div class="py-2 col-12">
                                         <label asp-for="Course.Chapters[0].Content" class="ms-2 text-muted">Chapter Content</label>
-                                        <textarea asp-for="Course.Chapters[0].Content" class="form-control border-0 shadow"></textarea>
+                                        <textarea asp-for="Course.Chapters[0].Content" class="form-control border-0 shadow chapter-content" id="Course_Chapters_0__Content"></textarea>
                                         <span asp-validation-for="Course.Chapters[0].Content" class="text-danger"></span>
                                     </div>
 
@@ -138,6 +144,79 @@
     </div>
 </div>
 
+@section scripts{
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.generate-content').forEach(button => {
+            button.addEventListener('click', function () {
+                const index = this.getAttribute('data-index');
+                const titleInput = document.querySelector(`.chapter-title[name="Course.Chapters[${index}].Title"]`);
+                const contentTextarea = document.querySelector(`.chapter-content[name="Course.Chapters[${index}].Content"]`);
+
+                const title = titleInput.value.trim();
+
+                if (title) {
+                    fetch('/Admin/Course/GenerateChapterContent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify({ title: title })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const editorId = `Course_Chapters_${index}__Content`; 
+                                if (tinymce.get(editorId)) {
+                                    tinymce.get(editorId).setContent(data.generatedContent);
+                                } else {
+                                    contentTextarea.value = data.generatedContent;
+                                }
+                            } else {
+                                alert('Error generating content: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while generating content.');
+                        });
+                } else {
+                    alert('Please enter a chapter title.');
+                }
+            });
+        });
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.generate-content').forEach(button => {
+            button.addEventListener('click', function () {
+                let index = this.getAttribute('data-index');
+                let titleInput = document.querySelector(`input[name="Course.Chapters[${index}].Title"]`);
+                let contentTextarea = document.querySelector(`textarea[name="Course.Chapters[${index}].Content"]`);
+
+                if (!titleInput.value.trim()) {
+                    alert("Please enter a chapter title before generating content.");
+                    return;
+                }
+
+                fetch(`/Admin/Course/GenerateChapter?title=${encodeURIComponent(titleInput.value)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        contentTextarea.value = data.generatedContent;
+                    })
+                    .catch(error => {
+                        console.error("Error generating content:", error);
+                    });
+            });
+        });
+    });
+</script>
+
 
 <script>
     document.getElementById('addChapterButton').addEventListener('click', function () {
@@ -178,10 +257,10 @@
 </script>
 
 
-@section scripts{
+
     <script>
         tinymce.init({
-            selector: 'textarea',
+            selector: 'textarea.chapter-content',
             apiKey: 'dj4nwfgxl573pnjczuwgs83yetc0vrtwlrr7pshh1ax8jok0',
             plugins: [
                 'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'lists', 'table', 'visualblocks', 'wordcount',

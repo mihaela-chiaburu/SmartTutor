@@ -9,41 +9,85 @@
         return shortDescription + (words.Length > 20 ? "..." : string.Empty);
     }
 }
+<!-- Filter Section -->
+<div class="filter-section" style="position: fixed; left: 0; top: 50px; width: 250px; padding: 15px; background-color: #f8f9fa; border-right: 2px solid #ddd; height: 100vh; overflow-y: auto;">
+    <div class="card shadow mb-4" style="border: none;">
+        <div class="card-header bg-secondary text-white" style="padding: 12px; text-align: center;">
+            <h6 class="mb-0" style="font-size: 1.25rem;">Filter by Category</h6>
+        </div>
+        <div class="card-body" style="padding: 10px;">
+            <form method="get" asp-action="Index" id="filterForm" style="margin-top: 10px;">
+                <!-- "All" Option -->
+                <div class="form-check" style="margin-bottom: 20px;">
+                    <input class="form-check-input" type="checkbox" name="categoryIds" value="0" id="category-all"
+                           style="width: 18px; height: 18px;"
+                           @(ViewBag.SelectedCategoryIds == null || !ViewBag.SelectedCategoryIds.Any() || ViewBag.SelectedCategoryIds.Contains(0) ? "checked" : "") />
+                    <label class="form-check-label" for="category-all" style="font-size: 1rem; margin-left: 10px;">
+                        All Categories
+                    </label>
+                </div>
 
-<div class="row pb-3">
-    @foreach (var course in Model)
-    {
-        <div class="col-lg-4 col-sm-12">
-            <div class="row p-2">
-                <div class="col-12 p-1">
-                    <div class="card border-0 p-3 shadow border-top border-5 rounded">
-                        @if (course.CourseImages != null && course.CourseImages.Any())
-                        {
-                            <img src="@Url.Content(course.CourseImages.FirstOrDefault()?.ImageUrl)" class="card-img-top rounded" />
-                        }
-                        else
-                        {
-                            <img src="http://placehold.co/500x600/png" class="card-img-top rounded" />
-                        }
+                <!-- Category Options -->
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <div class="form-check" style="margin-bottom: 15px;">
+                        <input class="form-check-input" type="checkbox" name="categoryIds" value="@category.CourseCategoryId" id="category-@category.CourseCategoryId"
+                               style="width: 18px; height: 18px;"
+                        @(ViewBag.SelectedCategoryIds != null && ViewBag.SelectedCategoryIds.Contains(category.CourseCategoryId) ? "checked" : "") />
+                        <label class="form-check-label" for="category-@category.CourseCategoryId" style="font-size: 1rem; margin-left: 10px;">
+                            @category.Name
+                        </label>
+                    </div>
+                }
 
-                        <div class="card-body pb-0">
-                            <div class="text-center">
-                                <p class="card-title h5 text-dark opacity-75 text-uppercase">@course.Title</p>
-                                <p class="text-muted">
-                                    @Html.Raw(GetShortDescription(course.Description))
-                                </p>
+                <!-- Apply Filters Button -->
+                <button type="submit" class="btn btn-primary mt-3" style="font-size: 1rem; padding: 10px 15px; width: 100%;">
+                    Apply Filters
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Course List Section -->
+<div class="course-list-section" style="margin-left: 200px; padding: 30px;">
+    <div class="row pb-3">
+        @foreach (var course in Model)
+        {
+            <div class="col-lg-4 col-sm-12">
+                <div class="row p-2">
+                    <div class="col-12 p-1">
+                        <div class="card border-0 p-3 shadow border-top border-5 rounded">
+                            @if (course.CourseImages != null && course.CourseImages.Any())
+                            {
+                                <img src="@Url.Content(course.CourseImages.FirstOrDefault()?.ImageUrl)" class="card-img-top rounded" />
+                            }
+                            else
+                            {
+                                <img src="http://placehold.co/500x600/png" class="card-img-top rounded" />
+                            }
+
+                            <div class="card-body pb-0">
+                                <div class="text-center">
+                                    <p class="card-title h5 text-dark opacity-75 text-uppercase">@course.Title</p>
+                                    <p class="text-muted">
+                                        @Html.Raw(GetShortDescription(course.Description))
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="text-center p-2">
-                            <a asp-action="Details"
-                               asp-route-courseId="@course.CourseId"
-                               class="btn btn-primary bg-gradient border-0 form-control">
-                                View Course
-                            </a>
+                            <div class="text-center p-2">
+                                <a asp-action="Details"
+                                   asp-route-courseId="@course.CourseId"
+                                   class="btn btn-primary bg-gradient border-0 form-control">
+                                    View Course
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>
+

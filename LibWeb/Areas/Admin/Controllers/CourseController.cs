@@ -18,11 +18,46 @@ namespace SmartTutor.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly AIService _aiService;
 
-        public CourseController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+
+        public CourseController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, AIService aiService)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _aiService = aiService;
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateChapterContent([FromBody] GenerateChapterRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Title))
+            {
+                return Json(new { success = false, message = "Title is required." });
+            }
+
+            try
+            {
+                // Clear and specific AI prompt
+               /* var prompt = $"You'll receive a chapter title as input. Your task is to write a short, clear, and structured chapter on this topic. " +
+                             $"Avoid any introductory phrases. Go straight to the point and provide valuable, detailed information. " +
+                             $"The title is: \"{request.Title}\". Write the chapter content now.";*/
+
+                var generatedContent = _aiService.GenerateChapterContent(request.Title);
+
+                return Json(new { success = true, generatedContent });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        public class GenerateChapterRequest
+        {
+            public string Title { get; set; }
         }
 
         public IActionResult Index()
