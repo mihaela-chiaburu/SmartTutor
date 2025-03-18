@@ -19,7 +19,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category");
+            IEnumerable<Course> courseList = _unitOfWork.Course.GetAll(includeProperties: "Category,CourseImages");
             return View(courseList);
         }
 

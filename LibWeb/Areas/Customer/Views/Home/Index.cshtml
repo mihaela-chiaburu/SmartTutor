@@ -19,12 +19,13 @@
                     <div class="card border-0 p-3 shadow border-top border-5 rounded">
                         @if (course.CourseImages != null && course.CourseImages.Any())
                         {
-                            <img src="@course.CourseImages.FirstOrDefault()?.ImageUrl ?? " http: //placehold.co/500x600/png"" class="card-img-top rounded" />
+                            <img src="@Url.Content(course.CourseImages.FirstOrDefault()?.ImageUrl)" class="card-img-top rounded" />
                         }
                         else
                         {
                             <img src="http://placehold.co/500x600/png" class="card-img-top rounded" />
                         }
+
                         <div class="card-body pb-0">
                             <div class="text-center">
                                 <p class="card-title h5 text-dark opacity-75 text-uppercase">@course.Title</p>
