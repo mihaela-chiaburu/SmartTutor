@@ -29,7 +29,7 @@ namespace SmartTutor.Areas.Admin.Controllers
 
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> GenerateChapterContent([FromBody] GenerateChapterRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Title))
@@ -44,7 +44,7 @@ namespace SmartTutor.Areas.Admin.Controllers
                              $"Avoid any introductory phrases. Go straight to the point and provide valuable, detailed information. " +
                              $"The title is: \"{request.Title}\". Write the chapter content now.";*/
 
-                var generatedContent = _aiService.GenerateChapterContent(request.Title);
+                /*var generatedContent = _aiService.GenerateChapterContent(request.Title);
 
                 return Json(new { success = true, generatedContent });
             }
@@ -52,19 +52,25 @@ namespace SmartTutor.Areas.Admin.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
-        }
+        }*/
 
 
-        public class GenerateChapterRequest
+        /*public class GenerateChapterRequest
         {
             public string Title { get; set; }
-        }
+        }*/
 
         public IActionResult Index()
         {
             List<Course> objCourseList = _unitOfWork.Course.GetAll(includeProperties: "Category").ToList();
             return View(objCourseList);
         }
+
+        public IActionResult Quiz()
+        {
+            return View();
+        }
+
 
         public IActionResult Upsert(int? id)
         {

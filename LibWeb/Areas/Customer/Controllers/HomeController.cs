@@ -21,11 +21,9 @@ namespace SmartTutor.Areas.Customer.Controllers
 
         public IActionResult Index(List<int> categoryIds)
         {
-            // Fetch all categories for the filter form
             var categories = _unitOfWork.CourseCategory.GetAll().ToList();
             ViewBag.Categories = categories;
 
-            // Fetch courses based on selected categories
             IEnumerable<Course> courseList;
             if (categoryIds != null && categoryIds.Any())
             {
@@ -66,7 +64,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
             if (chapter == null)
             {
-                return NotFound(); // If chapter doesn't exist, return 404
+                return NotFound(); 
             }
 
             return View(chapter);
@@ -82,21 +80,19 @@ namespace SmartTutor.Areas.Customer.Controllers
 
             if (course == null || !course.Quizzes.Any())
             {
-                return NotFound(); // If no quizzes are associated with the course, return 404
+                return NotFound();
             }
 
-            // Assuming we need the first quiz, but if you want a specific quiz, you can adjust accordingly
-            var quiz = course.Quizzes.FirstOrDefault(); // Assuming you are dealing with one quiz, but modify if needed
+            var quiz = course.Quizzes.FirstOrDefault(); 
             if (quiz == null)
             {
-                return NotFound(); // If no quiz is found, return 404
+                return NotFound(); 
             }
 
             var correctAnswersCount = 0;
 
             foreach (var question in quiz.Questions)
             {
-                // Check if the answer submitted for this question is correct
                 var userAnswerId = answers.FirstOrDefault(a => a.Key == question.Id).Value;
                 var correctAnswer = question.Answers.FirstOrDefault(a => a.Id == userAnswerId && a.IsCorrect);
 
@@ -106,11 +102,9 @@ namespace SmartTutor.Areas.Customer.Controllers
                 }
             }
 
-            // You can calculate the score as needed (e.g., percentage)
             var totalQuestions = quiz.Questions.Count;
             var score = (double)correctAnswersCount / totalQuestions * 100;
 
-            // Pass the score to the view or show a result page
             return View("QuizResult", new { Score = score });
         }
 

@@ -13,12 +13,15 @@ namespace Lib.Models
     {
         [Key]
         public int Id { get; set; }
+
         [Required]
         public string Title { get; set; }
-        public int CourseId { get; set; }
-        [ForeignKey("CourseId")]
-        public Course Course { get; set; }
-        public List<Question> Questions { get; set; }
-    }
 
+        public int ChapterId { get; set; } // Link quiz to a chapter
+        [ForeignKey("ChapterId")]
+        public Chapter Chapter { get; set; }
+
+        public List<Question> Questions { get; set; } = new List<Question>();
+    }
 }
+

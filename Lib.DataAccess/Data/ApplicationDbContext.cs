@@ -27,13 +27,6 @@ namespace Lib.DataAccess.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure the one-to-many relationship between Course and Quiz
-            modelBuilder.Entity<Course>()
-                .HasMany(c => c.Quizzes) // A Course has many Quizzes
-                .WithOne(q => q.Course) // A Quiz has one Course
-                .HasForeignKey(q => q.CourseId); // Foreign key in Quiz
-
-
             // Disable cascading delete for UserId and CourseId
             modelBuilder.Entity<UserProgress>()
                 .HasOne(up => up.User)
@@ -87,7 +80,7 @@ namespace Lib.DataAccess.Data
                 {
                     Id = 1,
                     Title = "Object-Oriented Programming (OOP) Quiz",
-                    CourseId = 6
+                    ChapterId = 2
                 }
             );
 

@@ -9,10 +9,8 @@
         </div>
     </div>
     <div class="card-body p-4">
-
         <form method="post" class="row" enctype="multipart/form-data">
             <input asp-for="Course.CourseId" hidden />
-            <input type="hidden" asp-for="Course.Chapters[0].CourseId" />
 
             <div class="row">
                 <div class="col-10">
@@ -41,60 +39,74 @@
                             <label asp-for="Course.CourseImages" class="ms-2"></label>
                         </div>
 
+                        <h4 class="mt-4">Chapters</h4>
                         <div id="chapterSection">
                             @if (Model.Course.Chapters != null && Model.Course.Chapters.Count > 0)
+
                             {
                                 @for (int i = 0; i < Model.Course.Chapters.Count; i++)
+
                                 {
-                                    <div class="chapter-container mb-3">
-                                        <input name="Course.Chapters[@i].CourseId" type="hidden" value="@Model.Course.CourseId" />
+                                    <div class="chapter-container mb-3 border p-3 rounded">
+                                        <input type="hidden" asp-for="Course.Chapters[i].ChapterId" />
+                                        <input type="hidden" asp-for="Course.Chapters[i].CourseId" />
+
                                         <div class="form-floating py-2 col-12">
-                                            <input asp-for="Course.Chapters[i].Title" class="form-control border-0 shadow chapter-title" />
+                                            <input asp-for="Course.Chapters[i].Title" class="form-control border-0 shadow" />
                                             <label asp-for="Course.Chapters[i].Title" class="ms-2">Chapter Title</label>
                                             <span asp-validation-for="Course.Chapters[i].Title" class="text-danger"></span>
-                                            <button type="button" class="btn btn-outline-secondary mt-2 generate-content" data-index="@i">Generate Content</button>
                                         </div>
 
-                                        <div class="py-2 col-12">
-                                            <label asp-for="Course.Chapters[i].Content" class="ms-2 text-muted">Chapter Content</label>
-                                            <textarea asp-for="Course.Chapters[i].Content" class="form-control border-0 shadow chapter-content" id="Course_Chapters_@(i)__Content"></textarea>
-                                            <span asp-validation-for="Course.Chapters[i].Content" class="text-danger"></span>
+                                        <div class="text-end">
+                                            <a asp-action="ManageQuestions" asp-controller="Quiz"
+                                               asp-route-chapterId="@Model.Course.Chapters[i].ChapterId"
+                                               class="btn btn-info me-2">
+                                                <i class="bi bi-question-circle"></i> Manage Questions
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger remove-chapter" data-index="@i">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
                                         </div>
-                                        <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="@i">Remove Chapter</button>
                                     </div>
                                 }
                             }
+
                             else
+
                             {
-                                <div class="chapter-container mb-3">
-                                    <input name="Course.Chapters[0].CourseId" type="hidden" value="@Model.Course.CourseId" />
+                                <div class="chapter-container mb-3 border p-3 rounded">
+                                    <input type="hidden" asp-for="Course.Chapters[0].ChapterId" />
+                                    <input type="hidden" asp-for="Course.Chapters[0].CourseId" />
+
                                     <div class="form-floating py-2 col-12">
-                                        <input asp-for="Course.Chapters[0].Title" class="form-control border-0 shadow chapter-title" />
+                                        <input asp-for="Course.Chapters[0].Title" class="form-control border-0 shadow" />
                                         <label asp-for="Course.Chapters[0].Title" class="ms-2">Chapter Title</label>
                                         <span asp-validation-for="Course.Chapters[0].Title" class="text-danger"></span>
-                                        <button type="button" class="btn btn-outline-secondary mt-2 generate-content" data-index="0">Generate Content</button>
                                     </div>
 
-                                    <div class="py-2 col-12">
-                                        <label asp-for="Course.Chapters[0].Content" class="ms-2 text-muted">Chapter Content</label>
-                                        <textarea asp-for="Course.Chapters[0].Content" class="form-control border-0 shadow chapter-content" id="Course_Chapters_0__Content"></textarea>
-                                        <span asp-validation-for="Course.Chapters[0].Content" class="text-danger"></span>
+                                    <div class="text-end">
+                                        <button type="button" class="btn btn-outline-danger remove-chapter" data-index="0">
+                                            <i class="bi bi-trash"></i> Remove
+                                        </button>
                                     </div>
-
-                                    <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="0">Remove Chapter</button>
                                 </div>
                             }
                         </div>
 
-                        <button type="button" class="btn btn-outline-primary mt-3" id="addChapterButton">+ Add Chapter</button>
+                        <button type="button" class="btn btn-outline-primary mt-3" id="addChapterButton">
+                            <i class="bi bi-plus-circle"></i> Add Chapter
+                        </button>
 
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
                                 @if (Model.Course.CourseId != 0)
+
                                 {
                                     <button type="submit" class="btn btn-primary form-control">Update</button>
                                 }
+
                                 else
+
                                 {
                                     <button type="submit" class="btn btn-primary form-control">Create</button>
                                 }
@@ -110,160 +122,75 @@
 
                 <div class="col-2">
                     @if (Model.Course.CourseImages != null)
+
                     {
+
                         foreach (var image in Model.Course.CourseImages)
+
                         {
                             <div class="border p-1 m-2 text-center">
                                 <img src="@image.ImageUrl" class="img-fluid" style="border-radius:5px; border:1px solid #bbb9b9" />
-                                <a asp-action="DeleteImage" class="btn btn-danger" asp-route-imageId="@image.Id">
+                                <a asp-action="DeleteImage" class="btn btn-danger mt-2" asp-route-imageId="@image.Id">
                                     <i class="bi bi-trash-fill"></i> Delete
                                 </a>
                             </div>
                         }
+
                     }
                 </div>
             </div>
-
         </form>
-
     </div>
 </div>
 
-
-
-
-@section scripts{
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll('.generate-content').forEach(button => {
-            button.addEventListener('click', function () {
-                const index = this.getAttribute('data-index');
-                const titleInput = document.querySelector(`.chapter-title[name="Course.Chapters[${index}].Title"]`);
-                const contentTextarea = document.querySelector(`.chapter-content[name="Course.Chapters[${index}].Content"]`);
-
-                const title = titleInput.value.trim();
-
-                if (title) {
-                    fetch('/Admin/Course/GenerateChapterContent', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        },
-                        body: JSON.stringify({ title: title })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const editorId = `Course_Chapters_${index}__Content`; 
-                                if (tinymce.get(editorId)) {
-                                    tinymce.get(editorId).setContent(data.generatedContent);
-                                } else {
-                                    contentTextarea.value = data.generatedContent;
-                                }
-                            } else {
-                                alert('Error generating content: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred while generating content.');
-                        });
-                } else {
-                    alert('Please enter a chapter title.');
-                }
-            });
-        });
-    });
-</script>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.generate-content').forEach(button => {
-            button.addEventListener('click', function () {
-                let index = this.getAttribute('data-index');
-                let titleInput = document.querySelector(`input[name="Course.Chapters[${index}].Title"]`);
-                let contentTextarea = document.querySelector(`textarea[name="Course.Chapters[${index}].Content"]`);
-
-                if (!titleInput.value.trim()) {
-                    alert("Please enter a chapter title before generating content.");
-                    return;
-                }
-
-                fetch(`/Admin/Course/GenerateChapter?title=${encodeURIComponent(titleInput.value)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        contentTextarea.value = data.generatedContent;
-                    })
-                    .catch(error => {
-                        console.error("Error generating content:", error);
-                    });
-            });
-        });
-    });
-</script>
-
-
-<script>
-    document.getElementById('addChapterButton').addEventListener('click', function () {
-        const chapterSection = document.getElementById('chapterSection');
-        const chapterIndex = chapterSection.querySelectorAll('.chapter-container').length;
-
-        const chapterHTML = `
-            <div class="chapter-container mb-3">
-                <input name="Course.Chapters[${chapterIndex}].ChapterId" type="hidden" value="0" />
-                <input name="Course.Chapters[${chapterIndex}].CourseId" type="hidden" value="@Model.Course.CourseId" /> <!-- Add this line -->
-                <div class="form-floating py-2 col-12">
-                    <input name="Course.Chapters[${chapterIndex}].Title" class="form-control border-0 shadow" />
-                    <label class="ms-2">Chapter Title</label>
-                </div>
-
-                <div class="py-2 col-12">
-                    <label class="ms-2 text-muted">Chapter Content</label>
-                    <textarea name="Course.Chapters[${chapterIndex}].Content" class="form-control border-0 shadow"></textarea>
-                </div>
-
-                <button type="button" class="btn btn-outline-danger mt-2 remove-chapter" data-index="${chapterIndex}">Remove Chapter</button>
-            </div>
-        `;
-
-        chapterSection.insertAdjacentHTML('beforeend', chapterHTML);
-
-        document.querySelectorAll('.remove-chapter').forEach(button => {
-            button.addEventListener('click', function() {
-                this.closest('.chapter-container').remove();
-            });
-        });
-    });
-    document.querySelectorAll('.remove-chapter').forEach(button => {
-        button.addEventListener('click', function() {
-            this.closest('.chapter-container').remove();
-        });
-    });
-</script>
-
-
-
+@section Scripts {
     <script>
-        tinymce.init({
-            selector: 'textarea.chapter-content',
-            apiKey: 'dj4nwfgxl573pnjczuwgs83yetc0vrtwlrr7pshh1ax8jok0',
-            plugins: [
-                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'lists', 'table', 'visualblocks', 'wordcount',
-                'markdown',
-            ],
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent ',
-            tinycomments_mode: 'embedded',
-            tinycomments_author: 'Author name',
-            mergetags_list: [
-                { value: 'First.Name', title: 'First Name' },
-                { value: 'Email', title: 'Email' },
-            ],
-            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add new chapter
+            document.getElementById('addChapterButton').addEventListener('click', function () {
+                const chapterSection = document.getElementById('chapterSection');
+                const chapterIndex = chapterSection.querySelectorAll('.chapter-container').length;
+
+                const newChapterHTML = `
+                            <div class="chapter-container mb-3 border p-3 rounded">
+                                <input type="hidden" name="Course.Chapters[${chapterIndex}].ChapterId" value="0" />
+                                <input type="hidden" name="Course.Chapters[${chapterIndex}].CourseId" value="@Model.Course.CourseId" />
+
+                                <div class="form-floating py-2 col-12">
+                                    <input name="Course.Chapters[${chapterIndex}].Title" class="form-control border-0 shadow" />
+                                    <label class="ms-2">Chapter Title</label>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-outline-danger remove-chapter" data-index="${chapterIndex}">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                chapterSection.insertAdjacentHTML('beforeend', newChapterHTML);
+            });
+
+            // Remove chapter
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-chapter')) {
+                    e.target.closest('.chapter-container').remove();
+
+                    // Reindex remaining chapters
+                    const containers = document.querySelectorAll('.chapter-container');
+                    containers.forEach((container, index) => {
+                        container.querySelectorAll('input, label, button').forEach(el => {
+                            if (el.name) el.name = el.name.replace(/\[\d+\]/, `[${index}]`);
+                            if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/\[\d+\]/, `[${index}]`);
+                            if (el.dataset.index) el.dataset.index = index;
+                        });
+                    });
+                }
+            });
         });
     </script>
+
     @{
         <partial name="_ValidationScriptsPartial" />
     }
