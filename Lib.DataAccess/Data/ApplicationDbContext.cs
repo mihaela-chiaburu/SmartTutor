@@ -24,6 +24,7 @@ namespace Lib.DataAccess.Data
         public DbSet<UserProgress> UserProgresses { get; set; }
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

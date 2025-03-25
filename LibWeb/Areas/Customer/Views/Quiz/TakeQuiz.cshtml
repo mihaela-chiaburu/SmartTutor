@@ -29,11 +29,10 @@
                                 @foreach (var answer in question.Answers)
                                 {
                                     <div class="form-check p-3 mb-2 bg-light rounded option">
-                                        <input class="form-check-input" type="radio" 
-                                               name="Answers[@question.Id].QuestionId" 
-                                               value="@question.Id" 
+                                        <input class="form-check-input" type="radio"
+                                               name="Answers[@question.Id].AnswerId"
+                                               value="@answer.Id"
                                                id="answer-@answer.Id" required>
-                                        <input type="hidden" name="Answers[@question.Id].AnswerId" value="@answer.Id" />
                                         <label class="form-check-label w-100" for="answer-@answer.Id">
                                             @answer.Text
                                         </label>
@@ -44,8 +43,13 @@
                     }
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary py-2">
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-outline-secondary" id="prevQuestion" disabled>Previous</button>
+                    <button type="button" class="btn btn-outline-primary" id="nextQuestion">Next</button>
+                </div>
+
+                <div class="d-grid gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary py-2" id="submitQuiz" style="display: none;">
                         Submit Quiz
                     </button>
                 </div>
@@ -56,6 +60,53 @@
 
 @section Scripts {
     <script>
+        // Question navigation
+        let currentQuestion = 0;
+        const questions = $('.question-container');
+        const totalQuestions = questions.length;
+
+        function showQuestion(index) {
+            questions.hide().eq(index).show();
+            $('#questionCounter').text(index + 1);
+
+            // Update navigation buttons
+            $('#prevQuestion').prop('disabled', index === 0);
+            $('#nextQuestion').prop('disabled', index === totalQuestions - 1);
+
+            // Show submit button only on last question
+            $('#submitQuiz').toggle(index === totalQuestions - 1);
+        }
+
+        // Initial setup
+        showQuestion(0);
+
+        // Navigation handlers
+        $('#nextQuestion').click(function () {
+            if (currentQuestion < totalQuestions - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+
+                // Get the quiz and question ID
+                let quizId = $('input[name="QuizId"]').val();
+                let questionId = questions.eq(currentQuestion).data('question-id');
+
+                // Check if the user already answered this question
+                $.get(`/Customer/Quiz/GetUserAnswer?quizId=${quizId}&questionId=${questionId}`, function (data) {
+                    if (data.answerId !== 0) {
+                        $(`#answer-${data.answerId}`).prop('checked', true);
+                    }
+                });
+            }
+        });
+
+
+        $('#prevQuestion').click(function () {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        });
+
         // Track time and tab switches
         let startTime = new Date();
         let tabSwitches = 0;
@@ -90,6 +141,34 @@
                 alert(`Please answer all questions. You have ${unanswered} unanswered questions.`);
             }
         });
+
+        // Highlight selected options
+        $('.option').click(function () {
+            $(this).find('input[type="radio"]').prop('checked', true);
+            $(this).addClass('selected').siblings().removeClass('selected');
+        });
+
+        let submittedAnswers = {};
+
+        $('.option').click(function () {
+            let answerId = $(this).find('input[type="radio"]').val();
+            let quizId = $('input[name="QuizId"]').val();
+            let questionId = $(this).closest('.question-container').data('question-id');
+
+            // Prevent duplicate submission for the same question
+            if (submittedAnswers[questionId] === answerId) {
+                return;
+            }
+            submittedAnswers[questionId] = answerId;
+
+            $.post('/Customer/Quiz/SaveUserAnswer', { quizId, questionId, answerId }, function (response) {
+                console.log(response);
+            });
+
+            $(this).find('input[type="radio"]').prop('checked', true);
+            $(this).addClass('selected').siblings().removeClass('selected');
+        });
+
     </script>
 
     <style>
@@ -108,6 +187,16 @@
         }
         .form-check-input:checked + .form-check-label {
             font-weight: bold;
+        }
+
+        .form-check-input:checked ~ .form-check-label {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .option.selected {
+            background-color: #e7f1ff !important;
+            border-left: 3px solid #0d6efd;
         }
     </style>
 }

@@ -71,8 +71,8 @@
                                     <span>
                                         <strong>@chapter.ChapterId. @chapter.Title</strong>
                                     </span>
-                                    <a asp-action="TakeQuiz" asp-route-chapterId="@chapter.ChapterId"
-                                       class="btn btn-primary btn-sm">
+                                    <a asp-area="Customer" asp-controller="Quiz" asp-action="TakeQuiz"
+                                       asp-route-chapterId="@chapter.ChapterId" class="btn btn-primary btn-sm">
                                         Test
                                     </a>
                                 </li>

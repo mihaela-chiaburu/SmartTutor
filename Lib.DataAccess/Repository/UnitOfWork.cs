@@ -19,6 +19,7 @@ namespace Lib.DataAccess.Repository
         public IApplicationUserRepository ApplicationUser { get; private set; }
         public IChapterRepository Chapter { get; private set; }
         public IQuizResultRepository QuizResult { get; private set; }
+        public IUserAnswerRepository UserAnswer { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -33,6 +34,7 @@ namespace Lib.DataAccess.Repository
             ApplicationUser = new ApplicationUserRepository(_db);
             Chapter = new ChapterRepository(_db);
             QuizResult = new QuizResultRepository(_db);
+            UserAnswer = new UserAnswerRepository(_db);
         }
 
         public void Save()
