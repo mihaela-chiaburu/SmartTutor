@@ -20,7 +20,7 @@ namespace SmartTutor.Models
         public int TimeTaken { get; set; } // in seconds
         public int TabSwitches { get; set; }
         public double ConfidenceLevel { get; set; }
-        public string SuggestedResources { get; set; } // JSON serialized
+        public string? SuggestedResources { get; set; } // JSON serialized
         public DateTime TakenOn { get; set; }
 
         [ForeignKey("UserId")]

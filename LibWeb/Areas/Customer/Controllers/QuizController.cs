@@ -51,99 +51,69 @@ namespace SmartTutor.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SubmitQuiz(QuizSubmission submission)
+        public async Task<IActionResult> SubmitQuiz(int quizId, Dictionary<int, int> SelectedAnswers, int timeTaken, int tabSwitches)
         {
             var user = await _userManager.GetUserAsync(User);
             var quiz = await _unitOfWork.Quiz.GetAsync(
-                q => q.Id == submission.QuizId,
+                q => q.Id == quizId,
                 includeProperties: "Questions,Questions.Answers,Chapter");
 
             if (quiz == null) return NotFound();
 
-            // Debug output to verify received data
-            Console.WriteLine($"Received submission for quiz {submission.QuizId}");
-            Console.WriteLine($"Time taken: {submission.TimeTaken} seconds");
-            Console.WriteLine($"Tab switches: {submission.TabSwitches}");
-            Console.WriteLine("Submitted answers:");
-            foreach (var answer in submission.Answers)
-            {
-                Console.WriteLine($"- Question {answer.QuestionId} => Answer {answer.AnswerId}");
-            }
-
-            // Calculate score - UPDATED LOGIC
+            // Calculate score
             var correctAnswers = 0;
-            foreach (var userAnswer in submission.Answers)
-            {
-                // Get the correct answer for this question
-                var correctAnswer = await _unitOfWork.Answer.GetAsync(
-                    a => a.QuestionId == userAnswer.QuestionId && a.IsCorrect);
+            var userAnswers = new List<UserAnswer>();
 
-                if (correctAnswer != null && userAnswer.AnswerId == correctAnswer.Id)
+            foreach (var question in quiz.Questions)
+            {
+                if (SelectedAnswers.TryGetValue(question.Id, out int selectedAnswerId))
                 {
-                    correctAnswers++;
+                    var selectedAnswer = await _unitOfWork.Answer.GetAsync(
+                        a => a.Id == selectedAnswerId && a.QuestionId == question.Id);
+
+                    bool isCorrect = selectedAnswer != null && selectedAnswer.IsCorrect;
+
+                    if (isCorrect) correctAnswers++;
+
+                    userAnswers.Add(new UserAnswer
+                    {
+                        UserId = user.Id,
+                        QuizId = quiz.Id,
+                        QuestionId = question.Id,
+                        AnswerId = selectedAnswerId,
+                        IsCorrect = isCorrect,
+                        AnsweredOn = DateTime.Now
+                    });
                 }
             }
 
             var score = (double)correctAnswers / quiz.Questions.Count * 100;
 
-            // Debug output for scoring
-            Console.WriteLine($"Correct answers: {correctAnswers}/{quiz.Questions.Count}");
-            Console.WriteLine($"Calculated score: {score}%");
-
-            // Save user answers to database
-            foreach (var userAnswer in submission.Answers)
+            // Save all user answers
+            foreach (var answer in userAnswers)
             {
-                var correctAnswer = await _unitOfWork.Answer.GetAsync(
-                    a => a.QuestionId == userAnswer.QuestionId && a.IsCorrect);
-
-                var isCorrect = correctAnswer != null && userAnswer.AnswerId == correctAnswer.Id;
-
-                var userAnswerEntity = new UserAnswer
-                {
-                    UserId = user.Id,
-                    QuizId = quiz.Id,
-                    QuestionId = userAnswer.QuestionId,
-                    AnswerId = userAnswer.AnswerId,
-                    IsCorrect = isCorrect,
-                    AnsweredOn = DateTime.Now
-                };
-
-                _unitOfWork.UserAnswer.Add(userAnswerEntity);
+                _unitOfWork.UserAnswer.Add(answer);
             }
 
-            // Perform AI analysis
-            var analysisRequest = new QuizAnalysisRequest
-            {
-                UserId = user.Id,
-                ChapterId = quiz.ChapterId,
-                Answers = submission.Answers,
-                TimeTaken = submission.TimeTaken,
-                TabSwitches = submission.TabSwitches
-            };
-
-            var analysis = await _aiService.AnalyzeQuizPerformance(analysisRequest);
-
-            // Save result
+            // Save quiz result with default suggested resources
             var result = new QuizResult
             {
                 UserId = user.Id,
                 QuizId = quiz.Id,
                 Score = score,
-                TimeTaken = submission.TimeTaken,
-                TabSwitches = submission.TabSwitches,
-                ConfidenceLevel = analysis.ConfidenceLevel,
-                SuggestedResources = JsonSerializer.Serialize(analysis.SuggestedResources),
+                TimeTaken = timeTaken,
+                TabSwitches = tabSwitches,
+                ConfidenceLevel = score / 100, // Simple confidence calculation
+                //SuggestedResources = JsonSerializer.Serialize(new List<SuggestedResource>()),
                 TakenOn = DateTime.Now
             };
 
             _unitOfWork.QuizResult.Add(result);
             await _unitOfWork.SaveAsync();
 
-            // Return results
             return View("QuizResult", new QuizResultViewModel
             {
                 Score = score,
-                Analysis = analysis,
                 Chapter = quiz.Chapter
             });
         }

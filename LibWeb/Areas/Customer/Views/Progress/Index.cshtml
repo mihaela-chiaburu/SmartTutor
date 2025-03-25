@@ -1,0 +1,239 @@
+﻿@model SmartTutor.Models.ViewModels.ProgressViewModel
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Your Learning Progress</h2>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Average Score</h5>
+                    <h2 class="card-text">@Model.AverageScore.ToString("0.##")%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Best Score</h5>
+                    <h2 class="card-text">@Model.BestScore.ToString("0.##")%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Attempts</h5>
+                    <h2 class="card-text">@Model.AttemptsCount</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Score Progress Over Time</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="scoreChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Time Spent Per Attempt</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="timeChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Attempts Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Quiz Attempt History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Quiz</th>
+                                    <th>Score</th>
+                                    <th>Time Taken</th>
+                                    <th>Confidence</th>
+                                    <th>Resources</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var result in Model.QuizResults)
+                                {
+                                    <tr>
+                                        <td>@result.TakenOn.ToString("g")</td>
+                                        <td>@result.Quiz.Title</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar @(result.Score >= 80 ? "bg-success" : result.Score >= 50 ? "bg-warning" : "bg-danger")"
+                                                     role="progressbar"
+                                                     style="width: @result.Score%"
+                                                     aria-valuenow="@result.Score"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100">
+                                                    @result.Score.ToString("0.##")%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@result.TimeTaken seconds</td>
+                                        <td>@((result.ConfidenceLevel * 100).ToString("0"))%</td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(result.SuggestedResources))
+                                            {
+                                                <button class="btn btn-sm btn-info" data-toggle="modal"
+                                                        data-target="#resourcesModal"
+                                                        data-resources="@result.SuggestedResources">
+                                                    View Resources
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">None suggested</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resources Modal -->
+<div class="modal fade" id="resourcesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Suggested Resources</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalResourcesContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Score Trend Chart
+        new Chart(document.getElementById('scoreChart'), {
+            type: 'line',
+            data: {
+                labels: [@Html.Raw($"'{Model.DateLabels.Replace(",", "','")}'")],
+                datasets: [{
+                    label: 'Score %',
+                    data: [@Model.ScoreTrendData],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // Time Spent Chart
+        new Chart(document.getElementById('timeChart'), {
+            type: 'bar',
+            data: {
+                labels: [@Html.Raw($"'{Model.DateLabels.Replace(",", "','")}'")],
+                datasets: [{
+                    label: 'Time (seconds)',
+                    data: [@Model.TimeTrendData],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Resources Modal
+        $('#resourcesModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var resourcesJson = button.data('resources');
+            var resources = JSON.parse(resourcesJson);
+
+            var content = '<div class="list-group">';
+            resources.forEach(function(resource) {
+                content += `
+                    <a href="${resource.Url}" target="_blank" class="list-group-item list-group-item-action">
+                        <h6>${resource.Title}</h6>
+                        <p class="mb-1">${resource.Description}</p>
+                    </a>
+                `;
+            });
+            content += '</div>';
+
+            $('#modalResourcesContent').html(content);
+        });
+    </script>
+    <style>
+        .card {
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .card-header {
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        .progress {
+            border-radius: 4px;
+        }
+
+        .table th {
+            border-top: none;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+    </style>
+}

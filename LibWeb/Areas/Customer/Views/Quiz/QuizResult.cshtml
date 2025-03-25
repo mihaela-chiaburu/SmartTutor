@@ -23,19 +23,45 @@
                 </div>
 
                 <div class="alert alert-info">
-                    <h4>Confidence Level: @((Model.Analysis.ConfidenceLevel * 100).ToString("0"))%</h4>
-                    <p>@Model.Analysis.Recommendations</p>
+                    @if (Model.Analysis != null)
+                    {
+                        <h4>Confidence Level: @((Model.Analysis.ConfidenceLevel * 100).ToString("0"))%</h4>
+                        <p>@Model.Analysis.Recommendations</p>
+                    }
+                    else
+                    {
+                        <h4>Performance Analysis</h4>
+                        <p>Review your answers and try the quiz again to improve your score.</p>
+                    }
                 </div>
             </div>
 
             <div class="col-md-6">
                 <h3>Suggested Resources</h3>
                 <div class="list-group">
-                    @foreach (var resource in Model.Analysis.SuggestedResources)
+                    @if (Model.Analysis?.SuggestedResources != null && Model.Analysis.SuggestedResources.Any())
                     {
-                        <a href="@resource.Url" target="_blank" class="list-group-item list-group-item-action">
-                            <h5>@resource.Title</h5>
-                            <p class="mb-1">@resource.Description</p>
+                        @foreach (var resource in Model.Analysis.SuggestedResources)
+                        {
+                            <a href="@resource.Url" target="_blank" class="list-group-item list-group-item-action">
+                                <h5>@resource.Title</h5>
+                                <p class="mb-1">@resource.Description</p>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="list-group-item">
+                            <h5>General Study Materials</h5>
+                            <p class="mb-1">Review the chapter materials and lecture notes</p>
+                        </div>
+                        <div class="list-group-item">
+                            <h5>Practice Exercises</h5>
+                            <p class="mb-1">Try additional practice questions to improve</p>
+                        </div>
+                        <a href="/Chapter/Details/@Model.Chapter.ChapterId" class="list-group-item list-group-item-action">
+                            <h5>Chapter Review</h5>
+                            <p class="mb-1">Revisit the chapter content</p>
                         </a>
                     }
                 </div>
