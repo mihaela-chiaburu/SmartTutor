@@ -16,7 +16,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add HttpClient for AI service
+builder.Services.AddHttpClient<AIService>();
+
+// Add AI service
 builder.Services.AddScoped<AIService>();
+
+builder.Services.Configure<AIServiceOptions>(builder.Configuration.GetSection("AIService"));
+
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
@@ -80,4 +87,9 @@ void SeedDtabase()
         var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
         dbInitializer.Initialize();
     }
+}
+
+public class AIServiceOptions
+{
+    public string Url { get; set; }
 }

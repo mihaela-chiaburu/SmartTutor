@@ -234,21 +234,28 @@ namespace SmartTutor.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveUserAnswer(int quizId, int questionId, int answerId)
+        public async Task<IActionResult> SaveUserAnswer(int quizId, int questionId, int answerId)
         {
-            var user = _userManager.GetUserAsync(User).Result;
+            var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
             // Find the correct answer
-            var correctAnswer = _unitOfWork.Answer
-                .Get(a => a.QuestionId == questionId && a.IsCorrect == true);
+            var correctAnswer = await _unitOfWork.Answer
+                .GetAsync(a => a.QuestionId == questionId && a.IsCorrect == true);
 
             // Check if selected answer is correct
             bool isCorrect = correctAnswer != null && correctAnswer.Id == answerId;
 
             // Check if the user has already submitted an answer for this question
-            var existingAnswer = _unitOfWork.UserAnswer
-                .Get(ua => ua.UserId == user.Id && ua.QuestionId == questionId);
+            var existingAnswer = await _unitOfWork.UserAnswer
+                .GetAsync(ua => ua.UserId == user.Id && ua.QuestionId == questionId);
+
+            string explanation = null;
+            if (!isCorrect && correctAnswer != null)
+            {
+                // Only generate explanation for wrong answers
+                explanation = await _aiService.GenerateExplanation(questionId, answerId);
+            }
 
             if (existingAnswer == null)
             {
@@ -271,14 +278,15 @@ namespace SmartTutor.Areas.Customer.Controllers
                 _unitOfWork.UserAnswer.Update(existingAnswer);
             }
 
-            _unitOfWork.Save();
+            await _unitOfWork.SaveAsync();
 
             // Return feedback data
             return Json(new
             {
                 success = true,
                 isCorrect,
-                correctAnswerId = correctAnswer?.Id
+                correctAnswerId = correctAnswer?.Id,
+                explanation = explanation ?? (isCorrect ? "Great job! That's correct!" : "Try again!")
             });
         }
 
