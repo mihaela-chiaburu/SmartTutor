@@ -9,6 +9,12 @@ namespace Lib.DataAccess.Repository.IRepository
 {
     public interface IRepository<T> where T : class
     {
+        Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null);
+        Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
+        Task AddAsync(T entity);
+        Task RemoveAsync(T entity);
+        Task RemoveRangeAsync(IEnumerable<T> entity);
+
         //T-category
         IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null);
         T Get(Expression<Func<T, bool>> filter, string? includeProperties = null, bool tracked = false);

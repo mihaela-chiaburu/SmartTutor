@@ -66,12 +66,6 @@ namespace SmartTutor.Areas.Admin.Controllers
             return View(objCourseList);
         }
 
-        public IActionResult Quiz()
-        {
-            return View();
-        }
-
-
         public IActionResult Upsert(int? id)
         {
             CourseVM courseVM = new()

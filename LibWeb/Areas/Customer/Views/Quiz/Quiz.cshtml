@@ -1,0 +1,113 @@
+﻿@model SmartTutor.Models.ViewModels.QuizViewModel
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">@Model.Quiz.Title</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="quiz-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="badge bg-primary fs-6">Question <span id="questionCounter">1</span>/@Model.Quiz.Questions.Count</span>
+                <span class="badge bg-info fs-6">Time: <span id="quizTimer">00:00</span></span>
+            </div>
+
+            <form id="quizForm" method="post" asp-action="SubmitQuiz">
+                <input type="hidden" name="QuizId" value="@Model.Quiz.Id" />
+                <input type="hidden" id="timeTaken" name="TimeTaken" value="0" />
+                <input type="hidden" id="tabSwitches" name="TabSwitches" value="0" />
+
+                <div id="questionsContainer">
+                    @foreach (var question in Model.Quiz.Questions)
+                    {
+                        <div class="question-container mb-4" data-question-id="@question.Id">
+                            <h3 class="question">@question.Text</h3>
+                            <div class="options">
+                                @foreach (var answer in question.Answers)
+                                {
+                                    <div class="form-check p-3 mb-2 bg-light rounded option">
+                                        <input class="form-check-input" type="radio" 
+                                               name="Answers[@question.Id].QuestionId" 
+                                               value="@question.Id" 
+                                               id="answer-@answer.Id" required>
+                                        <input type="hidden" name="Answers[@question.Id].AnswerId" value="@answer.Id" />
+                                        <label class="form-check-label w-100" for="answer-@answer.Id">
+                                            @answer.Text
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary py-2">
+                        Submit Quiz
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Track time and tab switches
+        let startTime = new Date();
+        let tabSwitches = 0;
+        
+        // Update timer every second
+        setInterval(function() {
+            let now = new Date();
+            let seconds = Math.floor((now - startTime) / 1000);
+            $('#timeTaken').val(seconds);
+            
+            let minutes = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+            $('#quizTimer').text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+        }, 1000);
+
+        // Track tab switches
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                tabSwitches++;
+                $('#tabSwitches').val(tabSwitches);
+            }
+        });
+
+        // Form validation
+        $('#quizForm').submit(function(e) {
+            let unanswered = $('.question-container').filter(function() {
+                return $(this).find('input[type="radio"]:checked').length === 0;
+            }).length;
+            
+            if (unanswered > 0) {
+                e.preventDefault();
+                alert(`Please answer all questions. You have ${unanswered} unanswered questions.`);
+            }
+        });
+    </script>
+
+    <style>
+        .question-container {
+            display: none;
+        }
+        .question-container:first-child {
+            display: block;
+        }
+        .option {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option:hover {
+            background-color: #e9ecef !important;
+        }
+        .form-check-input:checked + .form-check-label {
+            font-weight: bold;
+        }
+    </style>
+}

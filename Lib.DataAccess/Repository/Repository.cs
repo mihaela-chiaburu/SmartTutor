@@ -22,6 +22,59 @@ namespace Lib.DataAccess.Repository
             _db.Courses.Include(u => u.Category).Include(u => u.CategoryId);
 
         }
+        public async Task<T> GetAsync(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            query = query.Where(filter);
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await dbSet.AddAsync(entity);
+        }
+
+        public async Task RemoveAsync(T entity)
+        {
+            dbSet.Remove(entity);
+            await Task.CompletedTask;
+        }
+
+        public async Task RemoveRangeAsync(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
+            await Task.CompletedTask;
+        }
+
         public void Add(T entity)
         {
             dbSet.Add(entity);

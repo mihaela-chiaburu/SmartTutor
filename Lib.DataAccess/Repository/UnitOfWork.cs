@@ -18,6 +18,7 @@ namespace Lib.DataAccess.Repository
         public ICourseCategoryRepository CourseCategory { get; private set; }
         public IApplicationUserRepository ApplicationUser { get; private set; }
         public IChapterRepository Chapter { get; private set; }
+        public IQuizResultRepository QuizResult { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -31,11 +32,17 @@ namespace Lib.DataAccess.Repository
             CourseCategory = new CourseCategoryRepository(_db);
             ApplicationUser = new ApplicationUserRepository(_db);
             Chapter = new ChapterRepository(_db);
+            QuizResult = new QuizResultRepository(_db);
         }
 
         public void Save()
         {
             _db.SaveChanges();
+        }
+
+        public async Task SaveAsync()
+        {
+            await _db.SaveChangesAsync();
         }
     }
 }

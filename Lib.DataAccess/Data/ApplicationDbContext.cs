@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SmartTutor.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Lib.DataAccess.Data
@@ -22,6 +23,7 @@ namespace Lib.DataAccess.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<UserProgress> UserProgresses { get; set; }
         public DbSet<Chapter> Chapters { get; set; }
+        public DbSet<QuizResult> QuizResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

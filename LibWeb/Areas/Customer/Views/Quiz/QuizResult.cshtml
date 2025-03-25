@@ -1,0 +1,52 @@
+﻿@model SmartTutor.Models.ViewModels.QuizResultViewModel
+
+<div class="card shadow border-0 my-4">
+    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Quiz Results</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Your Score: @Model.Score.ToString("0.##")%</h3>
+                <div class="progress mb-4" style="height: 30px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: @Model.Score%;"
+                         aria-valuenow="@Model.Score"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        @Model.Score.ToString("0.##")%
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <h4>Confidence Level: @((Model.Analysis.ConfidenceLevel * 100).ToString("0"))%</h4>
+                    <p>@Model.Analysis.Recommendations</p>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Suggested Resources</h3>
+                <div class="list-group">
+                    @foreach (var resource in Model.Analysis.SuggestedResources)
+                    {
+                        <a href="@resource.Url" target="_blank" class="list-group-item list-group-item-action">
+                            <h5>@resource.Title</h5>
+                            <p class="mb-1">@resource.Description</p>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center">
+            <a asp-action="Details" asp-controller="Course" asp-route-courseId="@Model.Chapter.CourseId"
+               class="btn btn-primary">
+                Back to Course
+            </a>
+        </div>
+    </div>
+</div>
