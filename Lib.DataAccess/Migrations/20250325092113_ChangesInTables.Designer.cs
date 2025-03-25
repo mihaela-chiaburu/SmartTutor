@@ -4,6 +4,7 @@ using Lib.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace SmartTutor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250325092113_ChangesInTables")]
+    partial class ChangesInTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -423,7 +426,7 @@ namespace SmartTutor.DataAccess.Migrations
                         {
                             Id = 1,
                             ChapterId = 2,
-                            CreatedDate = new DateTime(2025, 3, 25, 11, 29, 14, 150, DateTimeKind.Local).AddTicks(4268),
+                            CreatedDate = new DateTime(2025, 3, 25, 11, 21, 11, 872, DateTimeKind.Local).AddTicks(3167),
                             Title = "Object-Oriented Programming (OOP) Quiz"
                         });
                 });

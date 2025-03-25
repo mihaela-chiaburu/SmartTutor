@@ -1,4 +1,5 @@
 ﻿using Lib.DataAccess.Repository.IRepository;
+using Lib.Models;
 using Lib.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,10 +25,110 @@ namespace SmartTutor.Areas.Customer.Controllers
             _userManager = userManager;
         }
 
-        /*public IActionResult Quiz()
+        public async Task<IActionResult> CreateQuiz(int chapterId)
         {
-            return View();
-        }*/
+            var chapter = await _unitOfWork.Chapter.GetAsync(c => c.ChapterId == chapterId, includeProperties: "Course");
+            if (chapter == null)
+            {
+                TempData["error"] = "Chapter not found";
+                return NotFound();
+            }
+            var quiz = new Quiz
+            {
+                ChapterId = chapterId,
+                Title = $"{chapter.Course?.Title ?? "Unknown Course"} - Chapter {chapter.ChapterId} Quiz",
+                CreatedDate = DateTime.Now // Add timestamp
+            };
+
+            try
+            {
+                _unitOfWork.Quiz.Add(quiz);
+                await _unitOfWork.SaveAsync();
+                TempData["success"] = "Quiz created successfully";
+                return RedirectToAction("ManageQuestions", new { chapterId });
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Error creating quiz: {ex.Message}";
+                return RedirectToAction("Index", "Home"); // Or appropriate error handling
+            }
+        }
+
+        public async Task<IActionResult> ManageQuestions(int chapterId)
+        {
+            var quiz = await _unitOfWork.Quiz.GetAsync(q => q.ChapterId == chapterId, includeProperties: "Questions,Questions.Answers,Chapter");
+            if (quiz == null) return RedirectToAction("CreateQuiz", new { chapterId });
+
+            var vm = new QuestionManagementVM
+            {
+                ChapterId = chapterId,
+                ChapterTitle = quiz.Chapter.Title,
+                Questions = quiz.Questions?.ToList() ?? new List<Question>()
+            };
+
+            return View(vm);
+        }
+
+        public async Task<IActionResult> CreateQuestion(int chapterId)
+        {
+            var quiz = await _unitOfWork.Quiz.GetAsync(q => q.ChapterId == chapterId);
+            if (quiz == null) return NotFound();
+
+            var vm = new QuestionVM
+            {
+                Question = new Question
+                {
+                    QuizId = quiz.Id,
+                    Answers = new List<Answer> { new Answer() } // Start with one empty answer
+                },
+                ChapterId = chapterId
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateQuestion(QuestionVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            // Debug output
+            Console.WriteLine($"Creating question for QuizId: {vm.Question.QuizId}");
+            Console.WriteLine($"Question text: {vm.Question.Text}");
+            Console.WriteLine($"Difficulty: {vm.Question.Difficulty}");
+
+            foreach (var answer in vm.Question.Answers)
+            {
+                Console.WriteLine($"Answer: {answer.Text}, Correct: {answer.IsCorrect}");
+            }
+
+            try
+            {
+                // Explicitly add question and answers
+                _unitOfWork.Question.Add(vm.Question);
+
+                foreach (var answer in vm.Question.Answers)
+                {
+                    answer.QuestionId = vm.Question.Id; // Ensure relationship
+                    _unitOfWork.Answer.Add(answer);
+                }
+
+                await _unitOfWork.SaveAsync();
+
+                Console.WriteLine($"Successfully saved question with ID: {vm.Question.Id}");
+                TempData["success"] = "Question created successfully";
+                return RedirectToAction("ManageQuestions", new { chapterId = vm.ChapterId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving question: {ex}");
+                TempData["error"] = $"Error creating question: {ex.Message}";
+                return View(vm);
+            }
+        }
 
         public IActionResult TakeQuiz(int chapterId)
         {
@@ -71,7 +172,7 @@ namespace SmartTutor.Areas.Customer.Controllers
                     var selectedAnswer = await _unitOfWork.Answer.GetAsync(
                         a => a.Id == selectedAnswerId && a.QuestionId == question.Id);
 
-                    bool isCorrect = selectedAnswer != null && selectedAnswer.IsCorrect;
+                    bool isCorrect = selectedAnswer != null && selectedAnswer.IsCorrect == true;
 
                     if (isCorrect) correctAnswers++;
 
@@ -140,7 +241,7 @@ namespace SmartTutor.Areas.Customer.Controllers
 
             // Find the correct answer
             var correctAnswer = _unitOfWork.Answer
-                .Get(a => a.QuestionId == questionId && a.IsCorrect);
+                .Get(a => a.QuestionId == questionId && a.IsCorrect == true);
 
             // Check if selected answer is correct
             bool isCorrect = correctAnswer != null && correctAnswer.Id == answerId;

@@ -4,6 +4,7 @@ using Lib.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace SmartTutor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250325091134_AddCourseIdAndCreatedDateToQuiz")]
+    partial class AddCourseIdAndCreatedDateToQuiz
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace SmartTutor.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsCorrect")
+                    b.Property<bool?>("IsCorrect")
                         .HasColumnType("bit");
 
                     b.Property<int>("QuestionId")
@@ -423,7 +426,7 @@ namespace SmartTutor.DataAccess.Migrations
                         {
                             Id = 1,
                             ChapterId = 2,
-                            CreatedDate = new DateTime(2025, 3, 25, 11, 29, 14, 150, DateTimeKind.Local).AddTicks(4268),
+                            CreatedDate = new DateTime(2025, 3, 25, 11, 11, 32, 749, DateTimeKind.Local).AddTicks(5959),
                             Title = "Object-Oriented Programming (OOP) Quiz"
                         });
                 });

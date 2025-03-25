@@ -4,6 +4,7 @@ using Lib.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace SmartTutor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250325083036_AddDifficultyToQuestions")]
+    partial class AddDifficultyToQuestions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -403,9 +406,6 @@ namespace SmartTutor.DataAccess.Migrations
                     b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -423,7 +423,6 @@ namespace SmartTutor.DataAccess.Migrations
                         {
                             Id = 1,
                             ChapterId = 2,
-                            CreatedDate = new DateTime(2025, 3, 25, 11, 29, 14, 150, DateTimeKind.Local).AddTicks(4268),
                             Title = "Object-Oriented Programming (OOP) Quiz"
                         });
                 });
@@ -819,13 +818,11 @@ namespace SmartTutor.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Lib.Models.Course", "Course")
+                    b.HasOne("Lib.Models.Course", null)
                         .WithMany("Quizzes")
                         .HasForeignKey("CourseId");
 
                     b.Navigation("Chapter");
-
-                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("Lib.Models.UserProgress", b =>

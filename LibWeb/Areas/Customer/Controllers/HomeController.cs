@@ -94,13 +94,14 @@ namespace SmartTutor.Areas.Customer.Controllers
             foreach (var question in quiz.Questions)
             {
                 var userAnswerId = answers.FirstOrDefault(a => a.Key == question.Id).Value;
-                var correctAnswer = question.Answers.FirstOrDefault(a => a.Id == userAnswerId && a.IsCorrect);
+                var correctAnswer = question.Answers.FirstOrDefault(a => a.Id == userAnswerId && a.IsCorrect == true); 
 
                 if (correctAnswer != null)
                 {
                     correctAnswersCount++;
                 }
             }
+
 
             var totalQuestions = quiz.Questions.Count;
             var score = (double)correctAnswersCount / totalQuestions * 100;

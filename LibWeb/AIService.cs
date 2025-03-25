@@ -17,7 +17,7 @@ public class AIService
         _configuration = configuration;
     }
 
-    public async Task<QuizAnalysis> AnalyzeQuizPerformance(QuizAnalysisRequest request)
+   /* public async Task<QuizAnalysis> AnalyzeQuizPerformance(QuizAnalysisRequest request)
     {
         // Get the chapter and questions for context
         var chapter = await _unitOfWork.Chapter.GetAsync(c => c.ChapterId == request.ChapterId);
@@ -26,29 +26,29 @@ public class AIService
             includeProperties: "Answers");
 
         // 1. Calculate basic metrics
-        var correctAnswers = questions.Count(q =>
+        /*var correctAnswers = questions.Count(q =>
             request.Answers.Any(a =>
                 a.QuestionId == q.Id &&
-                q.Answers.Any(ca => ca.Id == a.AnswerId && ca.IsCorrect)));
+                q.Answers.Any(ca => ca.Id == a.AnswerId && ca.IsCorrect)));*/
 
-        var accuracy = (double)correctAnswers / questions.Count();
+       // var accuracy = (double)correctAnswers / questions.Count();
 
         // 2. Calculate confidence score (0-1)
-        var confidenceScore = CalculateConfidenceScore(request, accuracy);
+        //var confidenceScore = CalculateConfidenceScore(request, accuracy);
 
         // 3. Determine weak areas
-        var weakAreas = IdentifyWeakAreas(request, questions);
+        //var weakAreas = IdentifyWeakAreas(request, questions);
 
         // 4. Generate recommendations
-        return new QuizAnalysis
+        /*return new QuizAnalysis
         {
             ConfidenceLevel = confidenceScore,
             SuggestedResources = GenerateResources(weakAreas, chapter),
             Recommendations = GenerateRecommendation(confidenceScore, accuracy)
         };
-    }
+    }*/
 
-    private double CalculateConfidenceScore(QuizAnalysisRequest request, double accuracy)
+    /*private double CalculateConfidenceScore(QuizAnalysisRequest request, double accuracy)
     {
         // Factors affecting confidence:
         // - Accuracy (50% weight)
@@ -65,9 +65,9 @@ public class AIService
         var tabSwitchScore = Math.Max(0, 1 - (request.TabSwitches * 0.1));
 
         return (accuracy * 0.5) + (timeScore * 0.3) + (tabSwitchScore * 0.2);
-    }
+    }*/
 
-    private List<string> IdentifyWeakAreas(QuizAnalysisRequest request, IEnumerable<Question> questions)
+    /*private List<string> IdentifyWeakAreas(QuizAnalysisRequest request, IEnumerable<Question> questions)
     {
         var weakAreas = new List<string>();
 
@@ -89,7 +89,7 @@ public class AIService
         }
 
         return weakAreas;
-    }
+    }*/
 
     private List<LearningResource> GenerateResources(List<string> weakAreas, Chapter chapter)
     {

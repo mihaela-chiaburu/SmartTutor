@@ -17,9 +17,16 @@ namespace Lib.Models
         [Required]
         public string Title { get; set; }
 
-        public int ChapterId { get; set; } // Link quiz to a chapter
+        public int ChapterId { get; set; }
         [ForeignKey("ChapterId")]
         public Chapter Chapter { get; set; }
+
+        // Add these new properties
+        public int? CourseId { get; set; } // Nullable since it's optional
+        [ForeignKey("CourseId")]
+        public Course? Course { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public List<Question> Questions { get; set; } = new List<Question>();
     }
