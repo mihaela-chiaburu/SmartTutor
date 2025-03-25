@@ -1,5 +1,15 @@
 ﻿@model SmartTutor.Models.ViewModels.QuizViewModel
 
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="answerToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" id="toastTitle">Answer Feedback</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage"></div>
+    </div>
+</div>
+
 <div class="card shadow border-0 my-4">
     <div class="card-header bg-secondary bg-gradient ml-0 py-3">
         <div class="row">
@@ -59,6 +69,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Question navigation
         let currentQuestion = 0;
@@ -75,6 +86,26 @@
 
             // Show submit button only on last question
             $('#submitQuiz').toggle(index === totalQuestions - 1);
+        }
+
+        // Function to show feedback toast
+        function showFeedbackToast(isCorrect, message) {
+            const toast = new bootstrap.Toast(document.getElementById('answerToast'));
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            if (isCorrect) {
+                toastTitle.textContent = 'Correct!';
+                toastTitle.className = 'me-auto text-success';
+                toastMessage.className = 'toast-body text-success';
+            } else {
+                toastTitle.textContent = 'Incorrect';
+                toastTitle.className = 'me-auto text-danger';
+                toastMessage.className = 'toast-body text-danger';
+            }
+            
+            toastMessage.textContent = message;
+            toast.show();
         }
 
         // Initial setup
@@ -97,14 +128,21 @@
                     }
                 });
             }
+            
+            // Clear any answer feedback when changing questions
+            $('.correct-answer, .incorrect-answer, .correct-answer-highlight')
+                .removeClass('correct-answer incorrect-answer correct-answer-highlight');
         });
-
 
         $('#prevQuestion').click(function () {
             if (currentQuestion > 0) {
                 currentQuestion--;
                 showQuestion(currentQuestion);
             }
+            
+            // Clear any answer feedback when changing questions
+            $('.correct-answer, .incorrect-answer, .correct-answer-highlight')
+                .removeClass('correct-answer incorrect-answer correct-answer-highlight');
         });
 
         // Track time and tab switches
@@ -142,18 +180,14 @@
             }
         });
 
-        // Highlight selected options
-        $('.option').click(function () {
-            $(this).find('input[type="radio"]').prop('checked', true);
-            $(this).addClass('selected').siblings().removeClass('selected');
-        });
-
         let submittedAnswers = {};
 
+        // Handle answer selection with instant feedback
         $('.option').click(function () {
             let answerId = $(this).find('input[type="radio"]').val();
             let quizId = $('input[name="QuizId"]').val();
             let questionId = $(this).closest('.question-container').data('question-id');
+            let $option = $(this);
 
             // Prevent duplicate submission for the same question
             if (submittedAnswers[questionId] === answerId) {
@@ -162,13 +196,25 @@
             submittedAnswers[questionId] = answerId;
 
             $.post('/Customer/Quiz/SaveUserAnswer', { quizId, questionId, answerId }, function (response) {
-                console.log(response);
+                // Visual feedback
+                if (response.isCorrect) {
+                    $option.addClass('correct-answer').removeClass('incorrect-answer');
+                    showFeedbackToast(true, 'Great job! That answer is correct.');
+                } else {
+                    $option.addClass('incorrect-answer').removeClass('correct-answer');
+                    showFeedbackToast(false, 'That answer is incorrect. Please try again.');
+                    
+                    // Highlight the correct answer if available
+                    if (response.correctAnswerId) {
+                        $(`#answer-${response.correctAnswerId}`).closest('.option')
+                            .addClass('correct-answer-highlight');
+                    }
+                }
+
+                $option.find('input[type="radio"]').prop('checked', true);
+                $option.addClass('selected').siblings().removeClass('selected');
             });
-
-            $(this).find('input[type="radio"]').prop('checked', true);
-            $(this).addClass('selected').siblings().removeClass('selected');
         });
-
     </script>
 
     <style>
@@ -188,15 +234,37 @@
         .form-check-input:checked + .form-check-label {
             font-weight: bold;
         }
-
         .form-check-input:checked ~ .form-check-label {
             font-weight: bold;
             color: #0d6efd;
         }
-
         .option.selected {
             background-color: #e7f1ff !important;
             border-left: 3px solid #0d6efd;
+        }
+        /* Feedback styles */
+        .correct-answer {
+            background-color: #d1e7dd !important;
+            border-left: 3px solid #198754 !important;
+        }
+        .incorrect-answer {
+            background-color: #f8d7da !important;
+            border-left: 3px solid #dc3545 !important;
+        }
+        .correct-answer-highlight {
+            background-color: #d1e7dd !important;
+            border-left: 3px solid #198754 !important;
+            animation: pulse 1.5s infinite;
+        }
+        @@keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
         }
     </style>
 }

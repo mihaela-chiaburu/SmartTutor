@@ -98,6 +98,8 @@ namespace SmartTutor.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Upsert(CourseVM courseVM, List<IFormFile> files)
         {
+            // Initialize Quizzes if null
+            courseVM.Course.Quizzes ??= new List<Quiz>();
             if (!ModelState.IsValid)
             {
                 // Log errors to understand what is failing

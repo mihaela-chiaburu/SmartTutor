@@ -133,7 +133,6 @@ namespace SmartTutor.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
         public IActionResult SaveUserAnswer(int quizId, int questionId, int answerId)
         {
             var user = _userManager.GetUserAsync(User).Result;
@@ -161,7 +160,6 @@ namespace SmartTutor.Areas.Customer.Controllers
                     IsCorrect = isCorrect,
                     AnsweredOn = DateTime.UtcNow
                 };
-
                 _unitOfWork.UserAnswer.Add(userAnswer);
             }
             else
@@ -173,9 +171,15 @@ namespace SmartTutor.Areas.Customer.Controllers
             }
 
             _unitOfWork.Save();
-            return Json(new { success = true, isCorrect });
-        }
 
+            // Return feedback data
+            return Json(new
+            {
+                success = true,
+                isCorrect,
+                correctAnswerId = correctAnswer?.Id
+            });
+        }
 
     }
 }
