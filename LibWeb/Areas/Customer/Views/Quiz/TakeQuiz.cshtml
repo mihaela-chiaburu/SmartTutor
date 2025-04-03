@@ -203,6 +203,7 @@
             let $questionContainer = $(this).closest('.question-container');
             let $feedbackBox = $questionContainer.find('.feedback-box');
             let $feedbackContent = $questionContainer.find('.feedback-content');
+            let $resourcesList = $questionContainer.find('.resources-list');
 
             // Prevent duplicate submission for the same question
             if (submittedAnswers[questionId] === answerId) {
@@ -215,35 +216,59 @@
                 questionId,
                 answerId
             }, function (response) {
+                // Extract and remove the "Learn more" section from the explanation
+                let explanation = response.explanation;
+                let learnMoreIndex = explanation.indexOf("Learn more:");
+                let learnMoreText = "";
+
+                if (learnMoreIndex !== -1) {
+                    learnMoreText = explanation.substring(learnMoreIndex);
+                    explanation = explanation.substring(0, learnMoreIndex).trim();
+                }
+
+                // Clear old resources
+                $resourcesList.empty();
+
                 // Visual feedback
                 if (response.isCorrect) {
                     $option.addClass('correct-answer').removeClass('incorrect-answer');
                     $feedbackBox.css('background-color', '#d1e7dd')
-                               .css('border-left', '4px solid #198754')
-                               .show();
+                        .css('border-left', '4px solid #198754')
+                        .show();
                     $feedbackContent.html(`
                         <div class="correct-explanation">
                             <i class="fas fa-check-circle me-2"></i>
-                            ${response.explanation}
+                            ${explanation}
                         </div>
                     `);
                 } else {
                     $option.addClass('incorrect-answer').removeClass('correct-answer');
                     $feedbackBox.css('background-color', '#f8d7da')
-                               .css('border-left', '4px solid #dc3545')
-                               .show();
+                        .css('border-left', '4px solid #dc3545')
+                        .show();
                     $feedbackContent.html(`
                         <div class="incorrect-explanation">
                             <i class="fas fa-times-circle me-2"></i>
-                            ${response.explanation}
+                            ${explanation}
                         </div>
                     `);
+                }
+
+                // Extract links from "Learn more" section and add them to resources
+                let urlRegex = /(https?:\/\/[^\s]+)/g;
+                let links = learnMoreText.match(urlRegex);
+
+                if (links) {
+                    links.forEach(link => {
+                        $resourcesList.append(`<li><a href="${link}" target="_blank">${link}</a></li>`);
+                    });
                 }
 
                 $option.find('input[type="radio"]').prop('checked', true);
                 $option.addClass('selected').siblings().removeClass('selected');
             });
         });
+
     </script>
 
     <style>

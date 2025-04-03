@@ -1,17 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Lib.DataAccess.Repository.IRepository;
-using Lib.Models;
-using System.Net.Http;
-using System.Text;
+﻿using Lib.DataAccess.Repository.IRepository;
 using Newtonsoft.Json;
+using System.Text;
 
 public class AIService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
+    private readonly string _deepSeekApiKey;
 
     public AIService(IUnitOfWork unitOfWork, IConfiguration configuration, HttpClient httpClient)
     {
@@ -19,11 +15,17 @@ public class AIService
         _configuration = configuration;
         _httpClient = httpClient;
 
-        // Add these configurations
-        _httpClient.BaseAddress = new Uri("http://localhost:11434");
-        _httpClient.Timeout = TimeSpan.FromSeconds(120); // Extended timeout
+        // Load DeepSeek API Key from configuration
+        _deepSeekApiKey = _configuration["DeepSeek:ApiKey"];
+
+        // Set API Base URL
+        _httpClient.BaseAddress = new Uri("https://api.deepseek.com/v1");
+
+        _httpClient.Timeout = TimeSpan.FromSeconds(120);
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_deepSeekApiKey}");
     }
+
     public async Task<string> GenerateExplanation(int questionId, int selectedAnswerId)
     {
         try
@@ -41,13 +43,7 @@ public class AIService
                           $"Correct answer: {correctAnswer.Text}\n" +
                           $"Selected answer: {selectedAnswer.Text}";
 
-            var prompt = $"Why is '{correctAnswer.Text}' the correct answer to '{question.Text}' " +
-                         $"and why is '{selectedAnswer.Text}' incorrect?";
-
-            var response = await CallDistilBERTApi(context, prompt);
-
-            return response ?? "Here's why this answer is incorrect: " +
-                   $"The correct answer is '{correctAnswer.Text}' because {GenerateSimpleExplanation(question, correctAnswer)}";
+            return await CallDeepSeekApi(context, question.Text);
         }
         catch (Exception ex)
         {
@@ -56,47 +52,42 @@ public class AIService
         }
     }
 
-    private async Task<string> CallDistilBERTApi(string context, string question)
+    private async Task<string> CallDeepSeekApi(string context, string questionText)
     {
         try
         {
-            // Extract the correct and selected answers from context
-            var lines = context.Split('\n');
-            if (lines.Length < 3)
-            {
-                return "Invalid question format";
-            }
+            var correctAnswerText = context.Split('\n')[1].Replace("Correct answer: ", "");
+            var selectedAnswerText = context.Split('\n')[2].Replace("Selected answer: ", "");
 
-            var questionText = lines[0].Replace("Question: ", "");
-            var correctAnswerText = lines[1].Replace("Correct answer: ", "");
-            var selectedAnswerText = lines[2].Replace("Selected answer: ", "");
+            var systemPrompt = $"You are a computer science tutor. Follow these rules strictly: " +
+                               $"1. Do NOT provide an introduction. Start directly with the explanation. " +
+                               $"2. In 1 - 2 sentences, explain why '{correctAnswerText}' is correct. " +
+                               $"3. In 1 - 2 sentences, explain why '{selectedAnswerText}' is incorrect. " +
+                               $"4. At the end, add a 'Learn more' section formatted like this: " +
+                               $"'Learn more:\\n1. Link1\\n2. Link2\\n...' " +
+                               $"5. Only include the links in the 'Learn more' section without any explanations. " +
+                               $"6. Keep the response concise and to the point.";
 
             var requestData = new
             {
-                model = "phi3:latest",
-                prompt = $"As a computer science tutor, explain in 1-2 sentences why '{correctAnswerText}' is correct " +
-                        $"and why '{selectedAnswerText}' is incorrect for: '{questionText}'. " +
-                        "Then suggest one study topic.",
-                stream = false,
-                options = new
+                model = "deepseek-chat",
+                messages = new[]
                 {
-                    temperature = 0.7,
-                    num_ctx = 2048
-                }
+                new { role = "system", content = systemPrompt },
+                new { role = "user", content = $"Question: {questionText}\nCorrect: {correctAnswerText}\nSelected: {selectedAnswerText}" }
+            },
+                temperature = 0.7,
+                max_tokens = 300
             };
 
-            var content = new StringContent(
-                JsonConvert.SerializeObject(requestData),
-                Encoding.UTF8,
-                "application/json"
-            );
-
-            var response = await _httpClient.PostAsync("api/generate", content);
+            var content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/chat/completions", content);
             response.EnsureSuccessStatusCode();
 
             var responseContent = await response.Content.ReadAsStringAsync();
             dynamic result = JsonConvert.DeserializeObject(responseContent);
-            return result?.response ?? "No explanation generated.";
+
+            return result?.choices[0]?.message?.content ?? "No explanation generated.";
         }
         catch (Exception ex)
         {
@@ -105,15 +96,4 @@ public class AIService
         }
     }
 
-    private string GenerateSimpleExplanation(Question question, Answer correctAnswer)
-    {
-        // Fallback simple explanation generator
-        return $"it directly relates to the question about {question.Text.Split(' ')[0]}.";
-    }
-
-    private class AIResponse
-    {
-        public string answer { get; set; }
-        public float score { get; set; }
-    }
 }
