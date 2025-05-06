@@ -11,7 +11,8 @@ namespace Lib.DataAccess.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-                
+            // Ensure CourseEnrollments table exists
+            Database.EnsureCreated();
         }
         public DbSet<CourseCategory> Categories { get; set; }
         public DbSet<Course> Courses { get; set; }
@@ -25,10 +26,54 @@ namespace Lib.DataAccess.Data
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
+        public DbSet<ChapterProgress> ChapterProgresses { get; set; }
+        public DbSet<UserPreferences> UserPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configure CourseEnrollment
+            modelBuilder.Entity<CourseEnrollment>(entity =>
+            {
+                entity.ToTable("CourseEnrollments");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).UseIdentityColumn();
+                
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(e => e.Course)
+                    .WithMany()
+                    .HasForeignKey(e => e.CourseId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(e => e.Progress)
+                    .WithOne(p => p.Enrollment)
+                    .HasForeignKey<CourseEnrollment>(e => e.ProgressId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure UserProgress
+            modelBuilder.Entity<UserProgress>(entity =>
+            {
+                entity.ToTable("UserProgresses");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).UseIdentityColumn();
+
+                entity.HasOne(up => up.User)
+                    .WithMany()
+                    .HasForeignKey(up => up.UserId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(up => up.Course)
+                    .WithMany()
+                    .HasForeignKey(up => up.CourseId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
             modelBuilder.Entity<Quiz>()
                 .HasMany(q => q.Questions)
@@ -47,13 +92,13 @@ namespace Lib.DataAccess.Data
                 .HasOne(up => up.User)
                 .WithMany()
                 .HasForeignKey(up => up.UserId)
-                .OnDelete(DeleteBehavior.NoAction);  // Disable cascading delete for UserId
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserProgress>()
                 .HasOne(up => up.Course)
                 .WithMany()
                 .HasForeignKey(up => up.CourseId)
-                .OnDelete(DeleteBehavior.NoAction);  // Disable cascading delete for CourseId
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Adding categories
             modelBuilder.Entity<CourseCategory>().HasData(
@@ -134,7 +179,17 @@ namespace Lib.DataAccess.Data
                 new Answer { Id = 20, Text = "A method", IsCorrect = false, QuestionId = 5 }
             );
 
+            modelBuilder.Entity<UserPreferences>()
+                .HasOne(p => p.User)
+                .WithOne()
+                .HasForeignKey<UserPreferences>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<UserPreferences>()
+                .HasOne(p => p.PreferredCategory)
+                .WithMany()
+                .HasForeignKey(p => p.PreferredCategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

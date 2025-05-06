@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace SmartTutor.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250318104133_AddQuestionsToQuiz")]
-    partial class AddQuestionsToQuiz
+    [Migration("20250505223929_AddSomeChanges")]
+    partial class AddSomeChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,9 +200,6 @@ namespace SmartTutor.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChapterId"));
 
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
@@ -215,6 +212,50 @@ namespace SmartTutor.DataAccess.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("Chapters");
+                });
+
+            modelBuilder.Entity("Lib.Models.ChapterProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("LastAccessed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LastAccessedPage")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TimeSpent")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("UserProgressId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserProgressId");
+
+                    b.ToTable("ChapterProgresses");
                 });
 
             modelBuilder.Entity("Lib.Models.Course", b =>
@@ -311,6 +352,44 @@ namespace SmartTutor.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Lib.Models.CourseEnrollment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CompletionDate");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int")
+                        .HasColumnName("CourseId");
+
+                    b.Property<DateTime>("EnrollmentDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("EnrollmentDate");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("Status");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CourseEnrollments", (string)null);
+                });
+
             modelBuilder.Entity("Lib.Models.CourseImage", b =>
                 {
                     b.Property<int>("Id")
@@ -341,6 +420,9 @@ namespace SmartTutor.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuizId")
                         .HasColumnType("int");
 
@@ -358,30 +440,35 @@ namespace SmartTutor.DataAccess.Migrations
                         new
                         {
                             Id = 1,
+                            Difficulty = 2,
                             QuizId = 1,
                             Text = "What is object-oriented programming (OOP)?"
                         },
                         new
                         {
                             Id = 2,
+                            Difficulty = 2,
                             QuizId = 1,
                             Text = "What does OOP focus on?"
                         },
                         new
                         {
                             Id = 3,
+                            Difficulty = 2,
                             QuizId = 1,
                             Text = "What is the first step in OOP?"
                         },
                         new
                         {
                             Id = 4,
+                            Difficulty = 2,
                             QuizId = 1,
                             Text = "What is the benefit of OOP for collaborative development?"
                         },
                         new
                         {
                             Id = 5,
+                            Difficulty = 2,
                             QuizId = 1,
                             Text = "What is an example of an object in OOP?"
                         });
@@ -395,8 +482,14 @@ namespace SmartTutor.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CourseId")
+                    b.Property<int>("ChapterId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -404,8 +497,9 @@ namespace SmartTutor.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId")
-                        .IsUnique();
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("Quizzes");
 
@@ -413,7 +507,8 @@ namespace SmartTutor.DataAccess.Migrations
                         new
                         {
                             Id = 1,
-                            CourseId = 6,
+                            ChapterId = 2,
+                            CreatedDate = new DateTime(2025, 5, 6, 1, 39, 28, 56, DateTimeKind.Local).AddTicks(3392),
                             Title = "Object-Oriented Programming (OOP) Quiz"
                         });
                 });
@@ -421,20 +516,24 @@ namespace SmartTutor.DataAccess.Migrations
             modelBuilder.Entity("Lib.Models.UserProgress", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("CourseId");
+
+                    b.Property<DateTime>("LastAccessed")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastAccessed");
 
                     b.Property<double>("ProgressPercentage")
-                        .HasColumnType("float");
+                        .HasColumnType("float")
+                        .HasColumnName("ProgressPercentage");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
 
                     b.HasKey("Id");
 
@@ -442,7 +541,7 @@ namespace SmartTutor.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProgresses");
+                    b.ToTable("UserProgresses", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -652,6 +751,90 @@ namespace SmartTutor.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SmartTutor.Models.QuizResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ChapterProgressId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("ConfidenceLevel")
+                        .HasColumnType("float");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SuggestedResources")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TabSwitches")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TakenOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TimeTaken")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("UserProgressId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChapterProgressId");
+
+                    b.HasIndex("QuizId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserProgressId");
+
+                    b.ToTable("QuizResults");
+                });
+
+            modelBuilder.Entity("SmartTutor.Models.UserAnswer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AnsweredOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserAnswers");
+                });
+
             modelBuilder.Entity("Lib.Models.ApplicationUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -688,6 +871,33 @@ namespace SmartTutor.DataAccess.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("Lib.Models.ChapterProgress", b =>
+                {
+                    b.HasOne("Lib.Models.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Lib.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Lib.Models.UserProgress", "UserProgress")
+                        .WithMany("ChapterProgresses")
+                        .HasForeignKey("UserProgressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserProgress");
+                });
+
             modelBuilder.Entity("Lib.Models.Course", b =>
                 {
                     b.HasOne("Lib.Models.CourseCategory", "Category")
@@ -703,6 +913,25 @@ namespace SmartTutor.DataAccess.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("Lib.Models.CourseEnrollment", b =>
+                {
+                    b.HasOne("Lib.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Lib.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Lib.Models.CourseImage", b =>
@@ -729,11 +958,17 @@ namespace SmartTutor.DataAccess.Migrations
 
             modelBuilder.Entity("Lib.Models.Quiz", b =>
                 {
-                    b.HasOne("Lib.Models.Course", "Course")
-                        .WithOne("Quiz")
-                        .HasForeignKey("Lib.Models.Quiz", "CourseId")
+                    b.HasOne("Lib.Models.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Lib.Models.Course", "Course")
+                        .WithMany("Quizzes")
+                        .HasForeignKey("CourseId");
+
+                    b.Navigation("Chapter");
 
                     b.Navigation("Course");
                 });
@@ -744,6 +979,12 @@ namespace SmartTutor.DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Lib.Models.CourseEnrollment", null)
+                        .WithOne("Progress")
+                        .HasForeignKey("Lib.Models.UserProgress", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Lib.Models.ApplicationUser", "User")
@@ -808,13 +1049,50 @@ namespace SmartTutor.DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SmartTutor.Models.QuizResult", b =>
+                {
+                    b.HasOne("Lib.Models.ChapterProgress", null)
+                        .WithMany("QuizResults")
+                        .HasForeignKey("ChapterProgressId");
+
+                    b.HasOne("Lib.Models.Quiz", "Quiz")
+                        .WithMany()
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Lib.Models.UserProgress", null)
+                        .WithMany("QuizResults")
+                        .HasForeignKey("UserProgressId");
+
+                    b.Navigation("Quiz");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Lib.Models.ChapterProgress", b =>
+                {
+                    b.Navigation("QuizResults");
+                });
+
             modelBuilder.Entity("Lib.Models.Course", b =>
                 {
                     b.Navigation("Chapters");
 
                     b.Navigation("CourseImages");
 
-                    b.Navigation("Quiz")
+                    b.Navigation("Quizzes");
+                });
+
+            modelBuilder.Entity("Lib.Models.CourseEnrollment", b =>
+                {
+                    b.Navigation("Progress")
                         .IsRequired();
                 });
 
@@ -826,6 +1104,13 @@ namespace SmartTutor.DataAccess.Migrations
             modelBuilder.Entity("Lib.Models.Quiz", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("Lib.Models.UserProgress", b =>
+                {
+                    b.Navigation("ChapterProgresses");
+
+                    b.Navigation("QuizResults");
                 });
 #pragma warning restore 612, 618
         }

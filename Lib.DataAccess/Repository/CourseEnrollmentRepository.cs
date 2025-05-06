@@ -1,26 +1,25 @@
-﻿using Lib.DataAccess.Data;
+using Lib.DataAccess.Data;
 using Lib.DataAccess.Repository.IRepository;
 using Lib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Lib.DataAccess.Repository
 {
-    public class UserProgressRepository : Repository<UserProgress>, IUserProgressRepository
+    public class CourseEnrollmentRepository : Repository<CourseEnrollment>, ICourseEnrollmentRepository
     {
         private ApplicationDbContext _db;
-        public UserProgressRepository(ApplicationDbContext db) : base(db)
+        public CourseEnrollmentRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
 
-        public void Update(UserProgress obj)
+        public void Update(CourseEnrollment obj)
         {
-            _db.UserProgresses.Update(obj);
+            _db.CourseEnrollments.Update(obj);
         }
     }
-}
+} 

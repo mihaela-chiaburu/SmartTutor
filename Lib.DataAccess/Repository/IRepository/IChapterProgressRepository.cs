@@ -1,4 +1,3 @@
-﻿using Lib.DataAccess.Repository.IRepository;
 using Lib.Models;
 using System;
 using System.Collections.Generic;
@@ -9,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Lib.DataAccess.Repository.IRepository
 {
-    public interface IUserProgressRepository : IRepository<UserProgress>
+    public interface IChapterProgressRepository : IRepository<ChapterProgress>
     {
-        void Update(UserProgress obj);
+        void Update(ChapterProgress obj);
     }
-}
+} 

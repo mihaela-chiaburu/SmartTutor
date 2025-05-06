@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lib.Models;
 
 namespace Lib.DataAccess.Repository.IRepository
 {
@@ -19,6 +20,10 @@ namespace Lib.DataAccess.Repository.IRepository
         IChapterRepository Chapter { get; }
         IQuizResultRepository QuizResult { get; }
         IUserAnswerRepository UserAnswer { get; }
+        ICourseEnrollmentRepository CourseEnrollment { get; }
+        IUserProgressRepository UserProgress { get; }
+        IChapterProgressRepository ChapterProgress { get; }
+        IUserPreferencesRepository UserPreferences { get; }
         void Save();
         Task SaveAsync();
     }

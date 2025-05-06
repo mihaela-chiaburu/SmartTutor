@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Lib.DataAccess.Repository.IRepository;
+using Lib.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SmartTutor.Areas.Identity.Pages.Account.Manage
 {
@@ -16,13 +19,16 @@ namespace SmartTutor.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IUnitOfWork _unitOfWork;
 
         public IndexModel(
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -45,6 +51,8 @@ namespace SmartTutor.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
 
+        public SelectList CategoryList { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -58,6 +66,21 @@ namespace SmartTutor.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Display(Name = "Preferred Category")]
+            public int? PreferredCategoryId { get; set; }
+
+            [Display(Name = "Email Notifications")]
+            public bool EmailNotifications { get; set; }
+
+            [Display(Name = "Course Updates")]
+            public bool CourseUpdates { get; set; }
+
+            [Display(Name = "Quiz Results")]
+            public bool QuizResults { get; set; }
+
+            [Display(Name = "Progress Updates")]
+            public bool ProgressUpdates { get; set; }
         }
 
         private async Task LoadAsync(IdentityUser user)
@@ -67,10 +90,30 @@ namespace SmartTutor.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
-            Input = new InputModel
+            // Load categories for dropdown
+            CategoryList = new SelectList(_unitOfWork.CourseCategory.GetAll(), "CourseCategoryId", "Name");
+
+            // Load user preferences
+            var preferences = await _unitOfWork.UserPreferences.GetFirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (preferences != null)
             {
-                PhoneNumber = phoneNumber
-            };
+                Input = new InputModel
+                {
+                    PhoneNumber = phoneNumber,
+                    PreferredCategoryId = preferences.PreferredCategoryId,
+                    EmailNotifications = preferences.EmailNotifications,
+                    CourseUpdates = preferences.CourseUpdates,
+                    QuizResults = preferences.QuizResults,
+                    ProgressUpdates = preferences.ProgressUpdates
+                };
+            }
+            else
+            {
+                Input = new InputModel
+                {
+                    PhoneNumber = phoneNumber
+                };
+            }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -110,6 +153,32 @@ namespace SmartTutor.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            // Update or create user preferences
+            var preferences = await _unitOfWork.UserPreferences.GetFirstOrDefaultAsync(p => p.UserId == user.Id);
+            if (preferences == null)
+            {
+                preferences = new UserPreferences
+                {
+                    UserId = user.Id,
+                    PreferredCategoryId = Input.PreferredCategoryId,
+                    EmailNotifications = Input.EmailNotifications,
+                    CourseUpdates = Input.CourseUpdates,
+                    QuizResults = Input.QuizResults,
+                    ProgressUpdates = Input.ProgressUpdates
+                };
+                _unitOfWork.UserPreferences.Add(preferences);
+            }
+            else
+            {
+                preferences.PreferredCategoryId = Input.PreferredCategoryId;
+                preferences.EmailNotifications = Input.EmailNotifications;
+                preferences.CourseUpdates = Input.CourseUpdates;
+                preferences.QuizResults = Input.QuizResults;
+                preferences.ProgressUpdates = Input.ProgressUpdates;
+                _unitOfWork.UserPreferences.Update(preferences);
+            }
+
+            await _unitOfWork.SaveAsync();
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();

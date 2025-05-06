@@ -2,6 +2,10 @@
 using Lib.DataAccess.Repository.IRepository;
 using Lib.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Lib.DataAccess.Repository
 {
@@ -20,6 +24,9 @@ namespace Lib.DataAccess.Repository
         public IChapterRepository Chapter { get; private set; }
         public IQuizResultRepository QuizResult { get; private set; }
         public IUserAnswerRepository UserAnswer { get; private set; }
+        public ICourseEnrollmentRepository CourseEnrollment { get; private set; }
+        public IChapterProgressRepository ChapterProgress { get; private set; }
+        public IUserPreferencesRepository UserPreferences { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -35,6 +42,9 @@ namespace Lib.DataAccess.Repository
             Chapter = new ChapterRepository(_db);
             QuizResult = new QuizResultRepository(_db);
             UserAnswer = new UserAnswerRepository(_db);
+            CourseEnrollment = new CourseEnrollmentRepository(_db);
+            ChapterProgress = new ChapterProgressRepository(_db);
+            UserPreferences = new UserPreferencesRepository(_db);
         }
 
         public void Save()

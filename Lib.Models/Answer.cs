@@ -22,7 +22,7 @@ namespace Lib.Models
         public int QuestionId { get; set; }
 
         [ForeignKey("QuestionId")]
-        [ValidateNever] // Skip validation for navigation property
+        [ValidateNever] 
         public Question Question { get; set; }
     }
 

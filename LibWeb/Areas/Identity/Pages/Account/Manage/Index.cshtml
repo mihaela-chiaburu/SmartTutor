@@ -20,6 +20,35 @@
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.PreferredCategoryId" class="form-label">Preferred Category</label>
+                <select asp-for="Input.PreferredCategoryId" asp-items="Model.CategoryList" class="form-select">
+                    <option value="">-- Select Category --</option>
+                </select>
+                <span asp-validation-for="Input.PreferredCategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <h5>Notification Settings</h5>
+                <div class="form-check mb-2">
+                    <input asp-for="Input.EmailNotifications" class="form-check-input" />
+                    <label asp-for="Input.EmailNotifications" class="form-check-label">Email Notifications</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="Input.CourseUpdates" class="form-check-input" />
+                    <label asp-for="Input.CourseUpdates" class="form-check-label">Course Updates</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="Input.QuizResults" class="form-check-input" />
+                    <label asp-for="Input.QuizResults" class="form-check-label">Quiz Results</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="Input.ProgressUpdates" class="form-check-input" />
+                    <label asp-for="Input.ProgressUpdates" class="form-check-label">Progress Updates</label>
+                </div>
+            </div>
+
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>
     </div>

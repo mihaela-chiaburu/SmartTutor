@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace SmartTutor.Areas.Customer.Controllers
 {
@@ -12,11 +14,13 @@ namespace SmartTutor.Areas.Customer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         public IActionResult Index(List<int> categoryIds)
@@ -40,8 +44,9 @@ namespace SmartTutor.Areas.Customer.Controllers
             return View(courseList);
         }
 
-        public IActionResult Details(int courseId)
+        public async Task<IActionResult> Details(int courseId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Course course = _unitOfWork.Course.Get(
                 u => u.CourseId == courseId,
                 includeProperties: "Category,Chapters,CourseImages"
@@ -50,6 +55,17 @@ namespace SmartTutor.Areas.Customer.Controllers
             if (course == null)
             {
                 return NotFound();
+            }
+
+            // Get enrollment status if user is logged in
+            if (userId != null)
+            {
+                var enrollment = await _unitOfWork.CourseEnrollment.GetAsync(
+                    e => e.UserId == userId && e.CourseId == courseId,
+                    includeProperties: "Progress"
+                );
+
+                ViewBag.Enrollment = enrollment;
             }
 
             return View(course);
@@ -69,9 +85,6 @@ namespace SmartTutor.Areas.Customer.Controllers
 
             return View(chapter);
         }
-
-
-
 
         [HttpPost]
         public IActionResult SubmitQuiz(int courseId, Dictionary<int, int> answers)
@@ -102,15 +115,113 @@ namespace SmartTutor.Areas.Customer.Controllers
                 }
             }
 
-
             var totalQuestions = quiz.Questions.Count;
             var score = (double)correctAnswersCount / totalQuestions * 100;
 
             return View("QuizResult", new { Score = score });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Enroll(int courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+            }
 
+            UserProgress progress = null;
+            try
+            {
+                // Check if already enrolled
+                var existingEnrollment = await _unitOfWork.CourseEnrollment.GetAsync(
+                    e => e.UserId == userId && e.CourseId == courseId
+                );
 
+                if (existingEnrollment != null)
+                {
+                    TempData["error"] = "You are already enrolled in this course.";
+                    return RedirectToAction("Details", new { courseId });
+                }
+
+                // Get course with chapters
+                var course = await _unitOfWork.Course.GetAsync(
+                    c => c.CourseId == courseId,
+                    includeProperties: "Chapters"
+                );
+
+                if (course == null)
+                {
+                    TempData["error"] = "Course not found.";
+                    return RedirectToAction("Index");
+                }
+
+                try
+                {
+                    // Create user progress first
+                    progress = new UserProgress
+                    {
+                        UserId = userId,
+                        CourseId = courseId,
+                        ProgressPercentage = 0,
+                        LastAccessed = DateTime.Now
+                    };
+
+                    // Add progress first to get its ID
+                    _unitOfWork.UserProgress.Add(progress);
+                    await _unitOfWork.SaveAsync();
+                    _logger.LogInformation("Created UserProgress with ID: {ProgressId}", progress.Id);
+
+                    // Create new enrollment with the progress ID
+                    var enrollment = new CourseEnrollment
+                    {
+                        UserId = userId,
+                        CourseId = courseId,
+                        EnrollmentDate = DateTime.Now,
+                        Status = EnrollmentStatus.Active,
+                        ProgressId = progress.Id // Set the foreign key
+                    };
+
+                    // Add enrollment
+                    _unitOfWork.CourseEnrollment.Add(enrollment);
+                    await _unitOfWork.SaveAsync();
+                    _logger.LogInformation("Created CourseEnrollment with ID: {EnrollmentId}", enrollment.Id);
+
+                    // Create chapter progress entries
+                    foreach (var chapter in course.Chapters)
+                    {
+                        var chapterProgress = new ChapterProgress
+                        {
+                            UserId = userId,
+                            ChapterId = chapter.ChapterId,
+                            UserProgressId = progress.Id,
+                            IsCompleted = false,
+                            LastAccessed = DateTime.Now
+                        };
+                        _unitOfWork.ChapterProgress.Add(chapterProgress);
+                    }
+
+                    await _unitOfWork.SaveAsync();
+                    _logger.LogInformation("Created ChapterProgress entries for course {CourseId}", courseId);
+
+                    TempData["success"] = "Successfully enrolled in the course!";
+                    return RedirectToAction("Details", new { courseId });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during enrollment process for course {CourseId} and user {UserId}. Progress ID: {ProgressId}", 
+                        courseId, userId, progress?.Id);
+                    throw; // Re-throw to be caught by outer try-catch
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error enrolling in course {CourseId} for user {UserId}. Error details: {ErrorMessage}", 
+                    courseId, userId, ex.Message);
+                TempData["error"] = $"An error occurred while enrolling in the course: {ex.Message}";
+                return RedirectToAction("Details", new { courseId });
+            }
+        }
 
         public IActionResult Privacy()
         {

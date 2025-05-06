@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SmartTutor.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedRelationAnswerQuestion : Migration
+    public partial class AddCourseEnrollmentsTry : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace SmartTutor.DataAccess.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "CreatedDate",
-                value: new DateTime(2025, 3, 25, 11, 29, 14, 150, DateTimeKind.Local).AddTicks(4268));
+                value: new DateTime(2025, 5, 6, 1, 20, 13, 133, DateTimeKind.Local).AddTicks(7215));
         }
 
         /// <inheritdoc />
@@ -27,7 +27,7 @@ namespace SmartTutor.DataAccess.Migrations
                 keyColumn: "Id",
                 keyValue: 1,
                 column: "CreatedDate",
-                value: new DateTime(2025, 3, 25, 11, 21, 11, 872, DateTimeKind.Local).AddTicks(3167));
+                value: new DateTime(2025, 5, 6, 1, 7, 3, 996, DateTimeKind.Local).AddTicks(3765));
         }
     }
 }
