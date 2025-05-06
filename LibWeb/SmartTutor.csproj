@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib.DataAccess\SmartTutor.DataAccess.csproj" />
+    <ProjectReference Include="..\SmartTutor.Services\SmartTutor.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

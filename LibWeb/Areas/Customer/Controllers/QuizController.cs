@@ -134,7 +134,7 @@ namespace SmartTutor.Areas.Customer.Controllers
         {
             var quiz = _unitOfWork.Quiz.Get(
                 q => q.ChapterId == chapterId,
-                includeProperties: "Questions,Questions.Answers"
+                includeProperties: "Questions,Questions.Answers,Chapter"
             );
 
             if (quiz == null)
@@ -142,10 +142,27 @@ namespace SmartTutor.Areas.Customer.Controllers
                 return NotFound();
             }
 
+            // Get the first question, prioritizing easy questions
+            var firstQuestion = quiz.Questions
+                .FirstOrDefault(q => q.Difficulty.ToString() == "Easy") 
+                ?? quiz.Questions.FirstOrDefault();
+
             var viewModel = new QuizViewModel
             {
-                Quiz = quiz,
-                ChapterId = chapterId
+                QuizId = quiz.Id,
+                Title = quiz.Title,
+                ChapterId = chapterId,
+                CurrentQuestion = firstQuestion != null ? new QuestionViewModel
+                {
+                    Id = firstQuestion.Id,
+                    Text = firstQuestion.Text,
+                    Difficulty = firstQuestion.Difficulty.ToString(),
+                    Answers = firstQuestion.Answers.Select(a => new AnswerViewModel
+                    {
+                        Id = a.Id,
+                        Text = a.Text
+                    }).ToList()
+                } : null
             };
 
             return View(viewModel);
@@ -234,31 +251,90 @@ namespace SmartTutor.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveUserAnswer(int quizId, int questionId, int answerId)
+        public async Task<IActionResult> SaveUserAnswer(int quizId, int questionId, int answerId, double responseTime, int tabSwitches)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
-
-            // Find the correct answer
-            var correctAnswer = await _unitOfWork.Answer
-                .GetAsync(a => a.QuestionId == questionId && a.IsCorrect == true);
-
-            // Check if selected answer is correct
-            bool isCorrect = correctAnswer != null && correctAnswer.Id == answerId;
-
-            // Check if the user has already submitted an answer for this question
-            var existingAnswer = await _unitOfWork.UserAnswer
-                .GetAsync(ua => ua.UserId == user.Id && ua.QuestionId == questionId);
-
-            string explanation = null;
-            if (!isCorrect && correctAnswer != null)
+            try
             {
-                // Only generate explanation for wrong answers
-                explanation = await _aiService.GenerateExplanation(questionId, answerId);
-            }
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "User not authenticated" });
+                }
 
-            if (existingAnswer == null)
-            {
+                var question = await _unitOfWork.Question.GetAsync(q => q.Id == questionId, includeProperties: "Answers");
+                if (question == null)
+                {
+                    return Json(new { success = false, message = "Question not found" });
+                }
+
+                var isCorrect = question.Answers.FirstOrDefault(a => a.Id == answerId)?.IsCorrect ?? false;
+
+                // Get user's recent answers for this quiz
+                var recentAnswers = await _unitOfWork.UserAnswer.GetAllAsync(
+                    ua => ua.QuizId == quizId && ua.UserId == user.Id
+                );
+                recentAnswers = recentAnswers.OrderByDescending(x => x.AnsweredOn).Take(5).ToList();
+
+                // Calculate accuracy from recent answers
+                var accuracy = recentAnswers.Any() 
+                    ? (double)recentAnswers.Count(a => a.IsCorrect) / recentAnswers.Count() 
+                    : 0;
+
+                // Determine next question difficulty based on performance
+                DifficultyLevel nextDifficulty;
+                if (recentAnswers.Count() < 10) // Only adapt difficulty if we haven't reached 10 questions
+                {
+                    if (isCorrect)
+                    {
+                        if (responseTime < 30 && tabSwitches == 0) // Fast and focused
+                        {
+                            nextDifficulty = question.Difficulty == DifficultyLevel.Easy ? DifficultyLevel.Medium : 
+                                            question.Difficulty == DifficultyLevel.Medium ? DifficultyLevel.Hard : 
+                                            DifficultyLevel.Hard;
+                        }
+                        else // Slow or unfocused
+                        {
+                            nextDifficulty = DifficultyLevel.Easy;
+                        }
+                    }
+                    else // Incorrect answer
+                    {
+                        nextDifficulty = question.Difficulty == DifficultyLevel.Hard ? DifficultyLevel.Medium : 
+                                        DifficultyLevel.Easy;
+                    }
+                }
+                else
+                {
+                    nextDifficulty = (DifficultyLevel)(-1); // No more questions needed
+                }
+
+                // Get next question if needed
+                Question nextQuestion = null;
+                if (nextDifficulty != (DifficultyLevel)(-1))
+                {
+                    // Get all questions for this quiz that haven't been answered yet
+                    var answeredQuestionIds = recentAnswers.Select(a => a.QuestionId).ToList();
+                    answeredQuestionIds.Add(questionId); // Include current question
+
+                    nextQuestion = await _unitOfWork.Question.GetAsync(
+                        q => q.QuizId == quizId && 
+                             q.Difficulty == nextDifficulty && 
+                             !answeredQuestionIds.Contains(q.Id),
+                        includeProperties: "Answers"  // Make sure to include answers
+                    );
+
+                    // If no questions of desired difficulty, try other difficulties
+                    if (nextQuestion == null)
+                    {
+                        nextQuestion = await _unitOfWork.Question.GetAsync(
+                            q => q.QuizId == quizId && 
+                                 !answeredQuestionIds.Contains(q.Id),
+                            includeProperties: "Answers"  // Make sure to include answers
+                        );
+                    }
+                }
+
+                // Save the user's answer
                 var userAnswer = new UserAnswer
                 {
                     UserId = user.Id,
@@ -266,28 +342,62 @@ namespace SmartTutor.Areas.Customer.Controllers
                     QuestionId = questionId,
                     AnswerId = answerId,
                     IsCorrect = isCorrect,
-                    AnsweredOn = DateTime.UtcNow
+                    AnsweredOn = DateTime.Now,
+                    ResponseTime = responseTime,
+                    TabSwitches = tabSwitches
                 };
+
                 _unitOfWork.UserAnswer.Add(userAnswer);
-            }
-            else
-            {
-                existingAnswer.AnswerId = answerId;
-                existingAnswer.IsCorrect = isCorrect;
-                existingAnswer.AnsweredOn = DateTime.UtcNow;
-                _unitOfWork.UserAnswer.Update(existingAnswer);
-            }
+                await _unitOfWork.SaveAsync();
 
-            await _unitOfWork.SaveAsync();
+                // Generate explanation for incorrect answers
+                string explanation;
+                try
+                {
+                    explanation = isCorrect 
+                        ? "Correct! Well done!" 
+                        : await _aiService.GenerateExplanation(questionId, answerId);
+                }
+                catch (Exception ex)
+                {
+                    // If AI service fails, use a default explanation
+                    explanation = isCorrect 
+                        ? "Correct! Well done!" 
+                        : "Incorrect. Please review the material and try again.";
+                }
 
-            // Return feedback data
-            return Json(new
+                var response = new
+                {
+                    success = true,
+                    isCorrect = isCorrect,
+                    explanation = explanation,
+                    nextQuestion = nextQuestion != null ? new QuestionViewModel
+                    {
+                        Id = nextQuestion.Id,
+                        Text = nextQuestion.Text,
+                        Difficulty = nextQuestion.Difficulty.ToString(),
+                        Answers = nextQuestion.Answers?.Select(a => new AnswerViewModel
+                        {
+                            Id = a.Id,
+                            Text = a.Text
+                        }).ToList() ?? new List<AnswerViewModel>()
+                    } : null
+                };
+
+                return Json(response);
+            }
+            catch (Exception ex)
             {
-                success = true,
-                isCorrect,
-                correctAnswerId = correctAnswer?.Id,
-                explanation = explanation ?? (isCorrect ? "Great job! That's correct!" : "Try again!")
-            });
+                // Log the exception
+                Console.WriteLine($"Error in SaveUserAnswer: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return Json(new { 
+                    success = false, 
+                    message = "An error occurred while saving your answer",
+                    error = ex.Message 
+                });
+            }
         }
 
     }

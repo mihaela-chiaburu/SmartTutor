@@ -27,6 +27,8 @@ namespace Lib.DataAccess.Repository
         public ICourseEnrollmentRepository CourseEnrollment { get; private set; }
         public IChapterProgressRepository ChapterProgress { get; private set; }
         public IUserPreferencesRepository UserPreferences { get; private set; }
+        public IRealTimePerformanceRepository RealTimePerformances { get; private set; }
+
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -45,6 +47,7 @@ namespace Lib.DataAccess.Repository
             CourseEnrollment = new CourseEnrollmentRepository(_db);
             ChapterProgress = new ChapterProgressRepository(_db);
             UserPreferences = new UserPreferencesRepository(_db);
+            RealTimePerformances = new RealTimePerformanceRepository(_db);
         }
 
         public void Save()

@@ -24,6 +24,7 @@ namespace Lib.DataAccess.Repository.IRepository
         IUserProgressRepository UserProgress { get; }
         IChapterProgressRepository ChapterProgress { get; }
         IUserPreferencesRepository UserPreferences { get; }
+        IRealTimePerformanceRepository RealTimePerformances { get; }
         void Save();
         Task SaveAsync();
     }

@@ -8,6 +8,7 @@ using Lib.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using Stripe;
 using Lib.DataAccess.DbInitializer;
+using Lib.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddHttpClient<AIService>();
 
 // Add AI service
 builder.Services.AddScoped<AIService>();
+
+builder.Services.AddSignalR();
+builder.Services.AddScoped<QuizAnalysisService>();
 
 builder.Services.Configure<AIServiceOptions>(builder.Configuration.GetSection("AIService"));
 
@@ -73,9 +77,12 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
-
 
 app.Run();
 

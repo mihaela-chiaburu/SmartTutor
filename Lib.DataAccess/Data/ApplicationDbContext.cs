@@ -29,6 +29,7 @@ namespace Lib.DataAccess.Data
         public DbSet<CourseEnrollment> CourseEnrollments { get; set; }
         public DbSet<ChapterProgress> ChapterProgresses { get; set; }
         public DbSet<UserPreferences> UserPreferences { get; set; }
+        public DbSet<RealTimePerformance> RealTimePerformances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

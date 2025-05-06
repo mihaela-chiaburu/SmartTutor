@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartTutor.Models", "Lib.Mo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartTutor.Utility", "Lib.Utility\SmartTutor.Utility.csproj", "{1BF5AAE1-A1F8-4C86-A1C0-5F04DE87BD2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartTutor.Services", "SmartTutor.Services\SmartTutor.Services.csproj", "{FEC40121-D9E1-4D8A-8973-A16C6EEC56E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{1BF5AAE1-A1F8-4C86-A1C0-5F04DE87BD2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BF5AAE1-A1F8-4C86-A1C0-5F04DE87BD2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BF5AAE1-A1F8-4C86-A1C0-5F04DE87BD2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEC40121-D9E1-4D8A-8973-A16C6EEC56E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEC40121-D9E1-4D8A-8973-A16C6EEC56E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEC40121-D9E1-4D8A-8973-A16C6EEC56E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEC40121-D9E1-4D8A-8973-A16C6EEC56E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

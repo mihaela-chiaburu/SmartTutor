@@ -40,9 +40,8 @@
                                 <span asp-validation-for="Question.Answers[i].Text" class="text-danger"></span>
                             </div>
                             <div class="form-check py-2 col-12">
-                                <input type="hidden" asp-for="Question.Answers[i].IsCorrect" value="false" />
-                                <input asp-for="Question.Answers[i].IsCorrect" class="form-check-input" value="true" />
-                                <label asp-for="Question.Answers[i].IsCorrect" class="form-check-label">Correct Answer</label>
+                                <input type="radio" name="correctAnswerIndex" value="@i" class="form-check-input correct-answer" />
+                                <label class="form-check-label">Correct Answer</label>
                             </div>
                             <button type="button" class="btn btn-outline-danger remove-answer">Remove</button>
                         </div>
@@ -80,9 +79,7 @@
                             <label>Answer Text</label>
                         </div>
                         <div class="form-check py-2 col-12">
-                            <input type="hidden" name="Question.Answers[${answerIndex}].IsCorrect" value="false" />
-                            <input type="checkbox" name="Question.Answers[${answerIndex}].IsCorrect" 
-                                   class="form-check-input" value="true" />
+                            <input type="radio" name="correctAnswerIndex" value="${answerIndex}" class="form-check-input correct-answer" />
                             <label class="form-check-label">Correct Answer</label>
                         </div>
                         <button type="button" class="btn btn-outline-danger remove-answer">Remove</button>
@@ -100,6 +97,9 @@
                         const $el = $(this);
                         if ($el.attr('name')) {
                             $el.attr('name', $el.attr('name').replace(/\[\d+\]/, `[${index}]`));
+                        }
+                        if ($el.attr('value')) {
+                            $el.attr('value', index);
                         }
                     });
                 });

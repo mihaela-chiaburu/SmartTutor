@@ -28,5 +28,6 @@ namespace SmartTutor.Models
 
         [ForeignKey("QuizId")]
         public Quiz Quiz { get; set; }
+        public DateTime StartTime { get; set; }
     }
 }
