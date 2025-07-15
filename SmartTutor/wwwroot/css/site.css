@@ -23,7 +23,7 @@ a.navbar-brand {
 
 .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
     color: #fff;
-    background-color: #1b6ec2;
+    background-color: #000000;
     border-color: #1861ac;
 }
 
@@ -62,7 +62,7 @@ html {
 
 
 .badge {
-    background-color: rgba(189, 116, 24, 0.6);
+    background-color: rgba(0, 0, 0, 0.6);
     color: white;
 }
 
@@ -83,15 +83,15 @@ html {
 }
 
 .bg-primary {
-    background-color: #192E2F !important;
+    background-color: #000000 !important;
 }
 
 .bg-secondary {
-    background-color: #3A595C !important;
+    background-color: #000000 !important;
 }
 
 bg-success {
-    background-color: #4b7147 !important;
+    background-color: #a1e09b !important;
 }
 
 
@@ -130,7 +130,7 @@ bg-success {
     .btn-check:checked + .btn-outline-primary,
     .btn-check:active + .btn-outline-primary, .btn-outline-primary:active, .btn-outline-primary.active, .btn-outline-primary.dropdown-toggle.show {
         color: #fff;
-        background-color: #192E2F;
+        background-color: #000000;
         border-color: #192E2F;
     }
 
@@ -244,7 +244,7 @@ bg-success {
 
 .btn-primary {
     color: #fff;
-    background-color: #192E2F;
+    background-color: #000000;
     border-color: #192E2F;
 }
 
