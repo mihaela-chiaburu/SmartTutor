@@ -9,10 +9,27 @@ SmartTutor is an educational platform designed to enhance learning through perso
 - **Adaptive Quizzes**: Dynamically adjusts difficulty based on user performance.
 - **Progress Tracking**: Provides detailed insights into learning milestones.
 - **Modular Architecture**: Built with an N-tier structure for scalability and maintainability.
-  
-<img width="1672" height="816" alt="image" src="https://github.com/user-attachments/assets/a164f90a-7eec-4a47-80b8-ec8c61c52d45" />
-<img width="1598" height="266" alt="image" src="https://github.com/user-attachments/assets/9e3484e4-76f1-4b56-960f-187a56f3d14f" />
-<img width="1502" height="867" alt="image" src="https://github.com/user-attachments/assets/8cbeb763-845e-4cd3-955c-53f24f986ddb" />
+
+<p align="center">
+    <kbd>
+        <img src="https://github.com/user-attachments/assets/a164f90a-7eec-4a47-80b8-ec8c61c52d45" alt="Courses Management" style="border: 10px solid black; padding: 10px; max-width: 20%; height: 350px;">
+    </kbd>
+    <p align="center"><em>Courses Management - Admin area</em></p>
+</p>
+
+<p align="center">
+    <kbd>
+        <img src="https://github.com/user-attachments/assets/9e3484e4-76f1-4b56-960f-187a56f3d14f" alt="Test Chapters" style="border: 10px solid black; padding: 10px; max-width: 20%; height: auto;">
+    </kbd>
+    <p align="center"><em>One chapter - One test</em></p>
+</p>
+
+<p align="center">
+    <kbd>
+        <img src="https://github.com/user-attachments/assets/8cbeb763-845e-4cd3-955c-53f24f986ddb" alt="AI answer analysis" style="border: 10px solid black; padding: 10px; max-width: 20%; height: 350px;">
+    </kbd>
+    <p align="center"><em>Example of AI Answer Analysis</em></p>
+</p>
 
 
 
