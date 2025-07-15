@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lib.DataAccess\SmartTutor.DataAccess.csproj" />
+    <ProjectReference Include="..\SmartTutor.DataAccess\SmartTutor.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

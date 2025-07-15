@@ -1,11 +1,11 @@
-﻿using Lib.DataAccess.Repository.IRepository;
-using Lib.Models;
+﻿using SmartTuror.DataAccess.Repository.IRepository;
+using SmartTuror.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Lib.Services
+namespace SmartTuror.Services
 {
     public class QuizAnalysisService
     {
