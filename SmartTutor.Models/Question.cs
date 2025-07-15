@@ -20,12 +20,12 @@ namespace SmartTuror.Models
         public int QuizId { get; set; }
 
         [ForeignKey("QuizId")]
-        [ValidateNever] // Add this to skip validation for navigation property
+        [ValidateNever]
         public Quiz Quiz { get; set; }
 
         public DifficultyLevel Difficulty { get; set; } = DifficultyLevel.Medium;
 
-        [ValidateNever] // Add this to skip validation for the collection
+        [ValidateNever] 
         public List<Answer> Answers { get; set; } = new List<Answer>();
     }
 

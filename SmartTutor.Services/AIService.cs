@@ -16,10 +16,8 @@ public class AIService
         _configuration = configuration;
         _httpClient = httpClient;
 
-        // Load DeepSeek API Key from configuration
         _deepSeekApiKey = _configuration["DeepSeek:ApiKey"];
 
-        // Set API Base URL
         _httpClient.BaseAddress = new Uri("https://api.deepseek.com/v1");
 
         _httpClient.Timeout = TimeSpan.FromSeconds(120);

@@ -38,7 +38,7 @@ namespace SmartTutor.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                _unitOfWork.CourseCategory.Add(obj); // Use CourseCategory, not Category
+                _unitOfWork.CourseCategory.Add(obj); 
                 _unitOfWork.Save();
                 TempData["success"] = "Category created successfully";
                 return RedirectToAction("Index");
@@ -65,7 +65,7 @@ namespace SmartTutor.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.CourseCategory.Update(obj); // Use CourseCategory, not Category
+                _unitOfWork.CourseCategory.Update(obj);
                 _unitOfWork.Save();
                 TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");

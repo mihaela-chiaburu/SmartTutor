@@ -13,7 +13,6 @@ namespace SmartTutor.Models.ViewModels
         public double BestScore { get; set; }
         public int AttemptsCount { get; set; }
 
-        // For chart data
         public string ScoreTrendData => string.Join(",",
             QuizResults.OrderBy(r => r.TakenOn).Select(r => r.Score));
 

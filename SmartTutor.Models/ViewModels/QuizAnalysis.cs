@@ -8,7 +8,7 @@ namespace SmartTutor.Models.ViewModels
 {
     public class QuizAnalysis
     {
-        public double ConfidenceLevel { get; set; } // 0-1 scale
+        public double ConfidenceLevel { get; set; } 
         public List<LearningResource> SuggestedResources { get; set; }
         public string Recommendations { get; set; }
     }

@@ -30,7 +30,6 @@ namespace SmartTuror.DataAccess.DbInitializer
 
         public void Initialize()
         {
-            //migrations if they are not applied
             try
             {
                 if (_db.Database.GetPendingMigrations().Count() > 0) 

@@ -10,7 +10,7 @@ namespace SmartTutor.Models.ViewModels
     {
         public int QuizId { get; set; }
         public List<QuestionAnswer> Answers { get; set; }
-        public int TimeTaken { get; set; } // in seconds
+        public int TimeTaken { get; set; } 
         public int TabSwitches { get; set; }
     }
 }

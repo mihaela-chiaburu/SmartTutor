@@ -13,10 +13,10 @@ namespace SmartTuror.Models
         public int QuizId { get; set; }
         public int QuestionId { get; set; }
         
-        public double ResponseTime { get; set; } // Time taken to answer in seconds
+        public double ResponseTime { get; set; } 
         public int TabSwitches { get; set; }
         public bool IsCorrect { get; set; }
-        public double ConfidenceLevel { get; set; } // 0-1 scale
+        public double ConfidenceLevel { get; set; }
         public DateTime Timestamp { get; set; }
         
         [ForeignKey("UserId")]

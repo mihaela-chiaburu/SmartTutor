@@ -21,8 +21,7 @@ namespace SmartTuror.Models
         [ForeignKey("ChapterId")]
         public Chapter Chapter { get; set; }
 
-        // Add these new properties
-        public int? CourseId { get; set; } // Nullable since it's optional
+        public int? CourseId { get; set; }
         [ForeignKey("CourseId")]
         public Course? Course { get; set; }
 

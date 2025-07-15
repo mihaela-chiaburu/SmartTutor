@@ -43,7 +43,6 @@ namespace SmartTutor.Areas.Admin.Controllers
                 }),
             };
 
-            // Fetch the user's role
             RoleVM.ApplicationUser.Role = _userManager.GetRolesAsync(_unitOfWork.ApplicationUser.Get(u => u.Id == userId))
                     .GetAwaiter().GetResult().FirstOrDefault();
             return View(RoleVM);
@@ -59,11 +58,9 @@ namespace SmartTutor.Areas.Admin.Controllers
 
             if (roleManagementVM.ApplicationUser.Role != oldRole)
             {
-                // A role was updated
                 _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
                 _userManager.AddToRoleAsync(applicationUser, roleManagementVM.ApplicationUser.Role).GetAwaiter().GetResult();
 
-                // Update user details
                 _unitOfWork.ApplicationUser.Update(applicationUser);
                 _unitOfWork.Save();
             }
@@ -95,14 +92,13 @@ namespace SmartTutor.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Error while Locking/Unlocking" });
             }
 
-            // Toggle lockout status for the user
             if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
             {
                 objFromDb.LockoutEnd = DateTime.Now;
             }
             else
             {
-                objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);  // Effectively locks the account
+                objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);  
             }
 
             _unitOfWork.ApplicationUser.Update(objFromDb);

@@ -13,13 +13,13 @@ namespace SmartTuror.Models.ViewModels
         public Course Course { get; set; }
         [ValidateNever]
         public IEnumerable<SelectListItem> CategoryList { get; set; }
-        public List<Chapter> Chapters { get; set; } = new List<Chapter>(); // Add this
+        public List<Chapter> Chapters { get; set; } = new List<Chapter>(); 
 
         public CourseVM()
         {
             Course = new Course
             {
-                Chapters = new List<Chapter> { new Chapter() } // Initialize with one empty chapter
+                Chapters = new List<Chapter> { new Chapter() } 
             };
         }
     }

@@ -56,7 +56,6 @@ namespace SmartTuror.DataAccess.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configure UserProgress
             modelBuilder.Entity<UserProgress>(entity =>
             {
                 entity.ToTable("UserProgresses");
@@ -86,7 +85,6 @@ namespace SmartTuror.DataAccess.Data
                 .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Disable cascading delete for UserId and CourseId
             modelBuilder.Entity<UserProgress>()
                 .HasOne(up => up.User)
                 .WithMany()
@@ -99,14 +97,12 @@ namespace SmartTuror.DataAccess.Data
                 .HasForeignKey(up => up.CourseId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Adding categories
             modelBuilder.Entity<CourseCategory>().HasData(
                 new CourseCategory { CourseCategoryId = 1, Name = "Programming", DisplayOrder = 1 },
                 new CourseCategory { CourseCategoryId = 2, Name = "Business", DisplayOrder = 2 },
                 new CourseCategory { CourseCategoryId = 3, Name = "Design", DisplayOrder = 3 }
             );
 
-            // Adding dummy courses
             modelBuilder.Entity<Course>().HasData(
                 new Course
                 {

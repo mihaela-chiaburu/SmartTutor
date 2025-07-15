@@ -36,7 +36,7 @@ namespace SmartTuror.Models
 
         public DateTime? CompletedDate { get; set; }
 
-        public double TimeSpent { get; set; } // in minutes
+        public double TimeSpent { get; set; } 
 
         public int LastAccessedPage { get; set; }
 

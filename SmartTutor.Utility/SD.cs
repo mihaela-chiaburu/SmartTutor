@@ -8,7 +8,7 @@ namespace SmartTuror.Utility
 {
     public static class SD
     {
-        // User roles in SmartTutor
+        // User roles 
         public const string Role_Student = "Student";
         public const string Role_Professor = "Professor";
         public const string Role_Admin = "Admin";

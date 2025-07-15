@@ -10,8 +10,8 @@ namespace SmartTuror.Services
     public class QuizAnalysisService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const double FAST_RESPONSE_THRESHOLD = 15.0; // seconds
-        private const double SLOW_RESPONSE_THRESHOLD = 45.0; // seconds
+        private const double FAST_RESPONSE_THRESHOLD = 15.0; 
+        private const double SLOW_RESPONSE_THRESHOLD = 45.0; 
         private const int MAX_TAB_SWITCHES = 3;
         private const double CONFIDENCE_THRESHOLD = 0.7;
 
@@ -26,28 +26,23 @@ namespace SmartTuror.Services
             int currentQuestionId,
             RealTimePerformance performance)
         {
-            // Get recent performance data for this user and quiz
             var recentPerformances = await _unitOfWork.RealTimePerformances.GetAllAsync(
                 p => p.UserId == userId && p.QuizId == quizId
             );
 
-            // Order and take the most recent 5 performances
             recentPerformances = recentPerformances
                 .OrderByDescending(p => p.Timestamp)
                 .Take(5)
                 .ToList();
 
-            // Calculate performance metrics
             var averageResponseTime = recentPerformances.Average(p => p.ResponseTime);
             var averageTabSwitches = recentPerformances.Average(p => p.TabSwitches);
             var correctAnswersCount = recentPerformances.Count(p => p.IsCorrect);
             var averageConfidence = recentPerformances.Average(p => p.ConfidenceLevel);
 
-            // Get current question
             var currentQuestion = await _unitOfWork.Question.GetAsync(q => q.Id == currentQuestionId);
             if (currentQuestion == null) return DifficultyLevel.Medium;
 
-            // Determine if we should adjust difficulty
             bool shouldIncreaseDifficulty =
                 averageResponseTime < FAST_RESPONSE_THRESHOLD &&
                 averageTabSwitches < MAX_TAB_SWITCHES &&
@@ -60,7 +55,6 @@ namespace SmartTuror.Services
                 correctAnswersCount <= 1 ||
                 averageConfidence < CONFIDENCE_THRESHOLD;
 
-            // Adjust difficulty
             if (shouldIncreaseDifficulty && currentQuestion.Difficulty < DifficultyLevel.Hard)
             {
                 currentQuestion.Difficulty = (DifficultyLevel)((int)currentQuestion.Difficulty + 1);
@@ -80,17 +74,14 @@ namespace SmartTuror.Services
             int tabSwitches,
             bool isCorrect)
         {
-            // Normalize response time (0-1 scale, where 1 is fastest)
             double normalizedResponseTime = Math.Max(0, 1 - (responseTime / SLOW_RESPONSE_THRESHOLD));
 
-            // Normalize tab switches (0-1 scale, where 1 is no tab switches)
             double normalizedTabSwitches = Math.Max(0, 1 - (tabSwitches / (double)MAX_TAB_SWITCHES));
 
-            // Calculate confidence based on multiple factors
             double confidence = (
-                (normalizedResponseTime * 0.4) + // 40% weight for response time
-                (normalizedTabSwitches * 0.2) +  // 20% weight for tab switches
-                (isCorrect ? 0.4 : 0.1)          // 40% weight for correctness
+                (normalizedResponseTime * 0.4) + 
+                (normalizedTabSwitches * 0.2) +  
+                (isCorrect ? 0.4 : 0.1)          
             );
 
             return Math.Min(1.0, Math.Max(0.0, confidence));

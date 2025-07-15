@@ -147,7 +147,6 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Add new chapter
             document.getElementById('addChapterButton').addEventListener('click', function () {
                 const chapterSection = document.getElementById('chapterSection');
                 const chapterIndex = chapterSection.querySelectorAll('.chapter-container').length;
@@ -173,12 +172,10 @@
                 chapterSection.insertAdjacentHTML('beforeend', newChapterHTML);
             });
 
-            // Remove chapter
             document.addEventListener('click', function (e) {
                 if (e.target.classList.contains('remove-chapter')) {
                     e.target.closest('.chapter-container').remove();
 
-                    // Reindex remaining chapters
                     const containers = document.querySelectorAll('.chapter-container');
                     containers.forEach((container, index) => {
                         container.querySelectorAll('input, label, button').forEach(el => {

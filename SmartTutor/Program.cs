@@ -13,15 +13,12 @@ using SmartTuror.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add HttpClient for AI service
 builder.Services.AddHttpClient<AIService>();
 
-// Add AI service
 builder.Services.AddScoped<AIService>();
 
 builder.Services.AddSignalR();
@@ -58,11 +55,9 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -84,7 +79,6 @@ app.MapControllerRoute(
     pattern: "{area=Student}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
 
 void SeedDtabase()
 {
