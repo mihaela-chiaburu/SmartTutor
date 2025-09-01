@@ -3,10 +3,9 @@
 <div class="container mt-5">
     <h2 class="text-uppercase">@Model.Title</h2>
     <p><strong>Course: </strong>@Model.Course.Title</p>
-    <!-- Display Quiz if exists -->
     @if (Model.Course.Quizzes.Any())
     {
-        var quiz = Model.Course.Quizzes.FirstOrDefault(); // Get the first quiz from the course
+        var quiz = Model.Course.Quizzes.FirstOrDefault(); 
         if (quiz != null)
         {
             <h4 class="mt-4">Quiz: @quiz.Title</h4>

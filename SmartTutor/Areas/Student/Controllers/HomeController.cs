@@ -57,7 +57,6 @@ namespace SmartTutor.Areas.Student.Controllers
                 return NotFound();
             }
 
-            // Get enrollment status if user is logged in
             if (userId != null)
             {
                 var enrollment = await _unitOfWork.CourseEnrollment.GetAsync(
@@ -133,7 +132,6 @@ namespace SmartTutor.Areas.Student.Controllers
             UserProgress progress = null;
             try
             {
-                // Check if already enrolled
                 var existingEnrollment = await _unitOfWork.CourseEnrollment.GetAsync(
                     e => e.UserId == userId && e.CourseId == courseId
                 );
@@ -144,7 +142,6 @@ namespace SmartTutor.Areas.Student.Controllers
                     return RedirectToAction("Details", new { courseId });
                 }
 
-                // Get course with chapters
                 var course = await _unitOfWork.Course.GetAsync(
                     c => c.CourseId == courseId,
                     includeProperties: "Chapters"
@@ -158,7 +155,6 @@ namespace SmartTutor.Areas.Student.Controllers
 
                 try
                 {
-                    // Create user progress first
                     progress = new UserProgress
                     {
                         UserId = userId,
@@ -167,27 +163,23 @@ namespace SmartTutor.Areas.Student.Controllers
                         LastAccessed = DateTime.Now
                     };
 
-                    // Add progress first to get its ID
                     _unitOfWork.UserProgress.Add(progress);
                     await _unitOfWork.SaveAsync();
                     _logger.LogInformation("Created UserProgress with ID: {ProgressId}", progress.Id);
 
-                    // Create new enrollment with the progress ID
                     var enrollment = new CourseEnrollment
                     {
                         UserId = userId,
                         CourseId = courseId,
                         EnrollmentDate = DateTime.Now,
                         Status = EnrollmentStatus.Active,
-                        ProgressId = progress.Id // Set the foreign key
+                        ProgressId = progress.Id 
                     };
 
-                    // Add enrollment
                     _unitOfWork.CourseEnrollment.Add(enrollment);
                     await _unitOfWork.SaveAsync();
                     _logger.LogInformation("Created CourseEnrollment with ID: {EnrollmentId}", enrollment.Id);
 
-                    // Create chapter progress entries
                     foreach (var chapter in course.Chapters)
                     {
                         var chapterProgress = new ChapterProgress
@@ -211,7 +203,7 @@ namespace SmartTutor.Areas.Student.Controllers
                 {
                     _logger.LogError(ex, "Error during enrollment process for course {CourseId} and user {UserId}. Progress ID: {ProgressId}", 
                         courseId, userId, progress?.Id);
-                    throw; // Re-throw to be caught by outer try-catch
+                    throw;
                 }
             }
             catch (Exception ex)

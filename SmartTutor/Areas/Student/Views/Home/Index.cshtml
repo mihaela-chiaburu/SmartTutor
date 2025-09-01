@@ -87,9 +87,8 @@
 
 @section style {
     <style>
-        /* Stiluri pentru carduri */
         .course-card {
-            height: 100%; /* Asigură că toate cardurile au aceeași înălțime */
+            height: 100%; 
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -99,43 +98,38 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-            /* Stiluri pentru imagini */
-            .course-card img {
-                width: 100%;
-                height: 200px; /* Înălțime fixă pentru imagini */
-                object-fit: cover; /* Asigură că imaginile se potrivesc în container */
-            }
-
-        /* Stiluri pentru text */
-        .card-body {
-            padding: 15px;
-            flex-grow: 1; /* Asigură că textul ocupă spațiul rămas */
+        .course-card img {
+            width: 100%;
+            height: 200px; 
+            object-fit: cover; 
         }
 
-        /* Stiluri pentru buton */
+        .card-body {
+            padding: 15px;
+            flex-grow: 1; 
+        }
+
         .card-button {
             width: 100%;
             padding: 10px;
             font-size: 1rem;
         }
 
-        /* Stiluri pentru secțiunea de filtrare */
         .filter-section {
             position: absolute;
-            top: 70px; /* Ajustează această valoare pentru a poziționa filtrul sub header */
+            top: 70px; 
             left: 0;
             width: 250px;
-            height: calc(100vh - 70px); /* Înălțimea totală minus spațiul de la top */
+            height: calc(100vh - 70px); 
             padding: 15px;
             background-color: #f8f9fa;
             border-right: 2px solid #ddd;
-            overflow-y: auto; /* Permite scroll dacă conținutul depășește înălțimea */
-            z-index: 1000; /* Asigură că filtrul este deasupra altor elemente */
+            overflow-y: auto; 
+            z-index: 1000; 
         }
 
-        /* Stiluri pentru secțiunea listei de cursuri */
         .course-list-section {
-            margin-left: 270px; /* Lățimea filtrului + spațiu */
+            margin-left: 270px; 
             padding: 30px;
         }
     </style>

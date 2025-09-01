@@ -80,7 +80,6 @@
         let questionStartTime = new Date();
         let submittedAnswers = {};
 
-        // Initialize with first question
         $(document).ready(function() {
             questions.push(@Html.Raw(Json.Serialize(Model.CurrentQuestion)));
             updateQuestionCounter();
@@ -136,7 +135,6 @@
                 </div>
             `);
 
-            // Reset tab switches for new question
             tabSwitches = 0;
             $('#tabSwitches').val(0);
             $('#tabSwitchCounter').text('0');
@@ -145,11 +143,9 @@
             updateDifficulty();
             questionStartTime = new Date();
             
-            // Re-enable radio buttons
             $('input[type="radio"]').prop('disabled', false);
         }
 
-        // Handle answer selection with instant feedback
         $(document).on('change', 'input[type="radio"]', function() {
             let answerId = $(this).val();
             let quizId = $('input[name="QuizId"]').val();
@@ -160,10 +156,8 @@
             let $feedbackContent = $questionContainer.find('.feedback-content');
             let $resourcesList = $questionContainer.find('.resources-list');
 
-            // Calculate response time for this question
             let responseTime = (new Date() - questionStartTime) / 1000;
 
-            // Prevent duplicate submission for the same question
             if (submittedAnswers[questionId] === answerId) {
                 return;
             }
@@ -177,7 +171,6 @@
                 tabSwitches: tabSwitches
             });
 
-            // Disable the radio buttons while processing
             $('input[type="radio"]').prop('disabled', true);
 
             $.ajax({
@@ -195,11 +188,9 @@
                 success: function(response) {
                     console.log('Server response:', response);
                     
-                    // Re-enable the radio buttons
                     $('input[type="radio"]').prop('disabled', false);
 
                     if (response.success) {
-                        // Extract and remove the "Learn more" section from the explanation
                         let explanation = response.explanation;
                         let learnMoreIndex = explanation.indexOf("Learn more:");
                         let learnMoreText = "";
@@ -209,10 +200,8 @@
                             explanation = explanation.substring(0, learnMoreIndex).trim();
                         }
 
-                        // Clear old resources
                         $resourcesList.empty();
 
-                        // Visual feedback
                         if (response.isCorrect) {
                             $option.addClass('correct-answer').removeClass('incorrect-answer');
                             $feedbackBox.css('background-color', '#d1e7dd')
@@ -237,7 +226,6 @@
                             `);
                         }
 
-                        // Extract links from "Learn more" section and add them to resources
                         let urlRegex = /(https?:\/\/[^\s]+)/g;
                         let links = learnMoreText.match(urlRegex);
 
@@ -247,11 +235,9 @@
                             });
                         }
 
-                        // If we have a next question and haven't reached 10 questions yet
                         if (response.nextQuestion && questions.length < 10) {
                             console.log('Adding next question:', response.nextQuestion);
                             questions.push(response.nextQuestion);
-                            // Enable the next button
                             $('#nextQuestion').prop('disabled', false);
                         } else if (questions.length >= 10) {
                             $('#submitQuiz').show();
@@ -262,7 +248,6 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    // Re-enable the radio buttons
                     $('input[type="radio"]').prop('disabled', false);
 
                     console.error('Error details:', {
@@ -274,12 +259,10 @@
             });
         });
 
-        // Navigation handlers
         $('#nextQuestion').click(function () {
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
                 showQuestion(currentQuestion);
-                // Disable the next button until an answer is selected
                 $(this).prop('disabled', true);
             }
         });
@@ -288,12 +271,10 @@
             if (currentQuestion > 0) {
                 currentQuestion--;
                 showQuestion(currentQuestion);
-                // Enable the next button if we're not at the last question
                 $('#nextQuestion').prop('disabled', currentQuestion >= questions.length - 1);
             }
         });
 
-        // Update timer every second
         setInterval(function () {
             let now = new Date();
             let seconds = Math.floor((now - startTime) / 1000);
@@ -304,7 +285,6 @@
             $('#quizTimer').text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
         }, 1000);
 
-        // Track tab switches
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) {
                 tabSwitches++;
@@ -313,7 +293,6 @@
             }
         });
 
-        // Form validation
         $('#quizForm').submit(function (e) {
             let unanswered = $('.question-container').filter(function () {
                 return $(this).find('input[type="radio"]:checked').length === 0;

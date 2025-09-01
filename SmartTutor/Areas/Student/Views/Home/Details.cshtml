@@ -51,7 +51,6 @@
 
                     @if (ViewBag.Enrollment?.Progress != null)
                     {
-                        // Calculate course progress
                         var totalChapters = Model.Chapters?.Count ?? 0;
                         var completedQuizzes = 0;
                         var totalScore = 0.0;
@@ -142,15 +141,12 @@
                                     var chapterProgress = chapterProgresses?
                                     .FirstOrDefault(cp => cp.ChapterId == chapter.ChapterId);
 
-                                    // Get all quiz results for this user
                                     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                                     Expression<Func<QuizResult, bool>> resultFilter = qr => qr.UserId == userId;
                                     var allQuizResults = await _unitOfWork.QuizResult.GetAllAsync(resultFilter);
 
-                                    // Get all quizzes
                                     var allQuizzes = await _unitOfWork.Quiz.GetAllAsync();
 
-                                    // Find the latest quiz result for this chapter
                                     var latestQuizResult = allQuizResults?
                                         .Where(qr => allQuizzes.Any(q => q.Id == qr.QuizId && q.ChapterId == chapter.ChapterId))
                                         .OrderByDescending(qr => qr.TakenOn)

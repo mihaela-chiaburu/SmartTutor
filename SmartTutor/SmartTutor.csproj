@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\images\product\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SmartTutor.DataAccess\SmartTutor.DataAccess.csproj" />
   </ItemGroup>
 

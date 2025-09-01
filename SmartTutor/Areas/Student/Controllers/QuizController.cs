@@ -37,7 +37,7 @@ namespace SmartTutor.Areas.Student.Controllers
             {
                 ChapterId = chapterId,
                 Title = $"{chapter.Course?.Title ?? "Unknown Course"} - Chapter {chapter.ChapterId} Quiz",
-                CreatedDate = DateTime.Now // Add timestamp
+                CreatedDate = DateTime.Now 
             };
 
             try
@@ -50,7 +50,7 @@ namespace SmartTutor.Areas.Student.Controllers
             catch (Exception ex)
             {
                 TempData["error"] = $"Error creating quiz: {ex.Message}";
-                return RedirectToAction("Index", "Home"); // Or appropriate error handling
+                return RedirectToAction("Index", "Home"); 
             }
         }
 
@@ -79,7 +79,7 @@ namespace SmartTutor.Areas.Student.Controllers
                 Question = new Question
                 {
                     QuizId = quiz.Id,
-                    Answers = new List<Answer> { new Answer() } // Start with one empty answer
+                    Answers = new List<Answer> { new Answer() } 
                 },
                 ChapterId = chapterId
             };
@@ -95,11 +95,6 @@ namespace SmartTutor.Areas.Student.Controllers
                 return View(vm);
             }
 
-            // Debug output
-            Console.WriteLine($"Creating question for QuizId: {vm.Question.QuizId}");
-            Console.WriteLine($"Question text: {vm.Question.Text}");
-            Console.WriteLine($"Difficulty: {vm.Question.Difficulty}");
-
             foreach (var answer in vm.Question.Answers)
             {
                 Console.WriteLine($"Answer: {answer.Text}, Correct: {answer.IsCorrect}");
@@ -107,12 +102,11 @@ namespace SmartTutor.Areas.Student.Controllers
 
             try
             {
-                // Explicitly add question and answers
                 _unitOfWork.Question.Add(vm.Question);
 
                 foreach (var answer in vm.Question.Answers)
                 {
-                    answer.QuestionId = vm.Question.Id; // Ensure relationship
+                    answer.QuestionId = vm.Question.Id;
                     _unitOfWork.Answer.Add(answer);
                 }
 
@@ -142,7 +136,6 @@ namespace SmartTutor.Areas.Student.Controllers
                 return NotFound();
             }
 
-            // Get the first question, prioritizing easy questions
             var firstQuestion = quiz.Questions
                 .FirstOrDefault(q => q.Difficulty.ToString() == "Easy") 
                 ?? quiz.Questions.FirstOrDefault();
@@ -178,7 +171,6 @@ namespace SmartTutor.Areas.Student.Controllers
 
             if (quiz == null) return NotFound();
 
-            // Calculate score
             var correctAnswers = 0;
             var userAnswers = new List<UserAnswer>();
 
@@ -207,13 +199,11 @@ namespace SmartTutor.Areas.Student.Controllers
 
             var score = (double)correctAnswers / quiz.Questions.Count * 100;
 
-            // Save all user answers
             foreach (var answer in userAnswers)
             {
                 _unitOfWork.UserAnswer.Add(answer);
             }
 
-            // Save quiz result with default suggested resources
             var result = new QuizResult
             {
                 UserId = user.Id,
@@ -221,8 +211,7 @@ namespace SmartTutor.Areas.Student.Controllers
                 Score = score,
                 TimeTaken = timeTaken,
                 TabSwitches = tabSwitches,
-                ConfidenceLevel = score / 100, // Simple confidence calculation
-                //SuggestedResources = JsonSerializer.Serialize(new List<SuggestedResource>()),
+                ConfidenceLevel = score / 100,
                 TakenOn = DateTime.Now
             };
 
@@ -269,35 +258,32 @@ namespace SmartTutor.Areas.Student.Controllers
 
                 var isCorrect = question.Answers.FirstOrDefault(a => a.Id == answerId)?.IsCorrect ?? false;
 
-                // Get user's recent answers for this quiz
                 var recentAnswers = await _unitOfWork.UserAnswer.GetAllAsync(
                     ua => ua.QuizId == quizId && ua.UserId == user.Id
                 );
                 recentAnswers = recentAnswers.OrderByDescending(x => x.AnsweredOn).Take(5).ToList();
 
-                // Calculate accuracy from recent answers
                 var accuracy = recentAnswers.Any() 
                     ? (double)recentAnswers.Count(a => a.IsCorrect) / recentAnswers.Count() 
                     : 0;
 
-                // Determine next question difficulty based on performance
                 DifficultyLevel nextDifficulty;
-                if (recentAnswers.Count() < 10) // Only adapt difficulty if we haven't reached 10 questions
+                if (recentAnswers.Count() < 10) 
                 {
                     if (isCorrect)
                     {
-                        if (responseTime < 30 && tabSwitches == 0) // Fast and focused
+                        if (responseTime < 30 && tabSwitches == 0) 
                         {
                             nextDifficulty = question.Difficulty == DifficultyLevel.Easy ? DifficultyLevel.Medium : 
                                             question.Difficulty == DifficultyLevel.Medium ? DifficultyLevel.Hard : 
                                             DifficultyLevel.Hard;
                         }
-                        else // Slow or unfocused
+                        else 
                         {
                             nextDifficulty = DifficultyLevel.Easy;
                         }
                     }
-                    else // Incorrect answer
+                    else 
                     {
                         nextDifficulty = question.Difficulty == DifficultyLevel.Hard ? DifficultyLevel.Medium : 
                                         DifficultyLevel.Easy;
@@ -305,36 +291,32 @@ namespace SmartTutor.Areas.Student.Controllers
                 }
                 else
                 {
-                    nextDifficulty = (DifficultyLevel)(-1); // No more questions needed
+                    nextDifficulty = (DifficultyLevel)(-1); 
                 }
 
-                // Get next question if needed
                 Question nextQuestion = null;
                 if (nextDifficulty != (DifficultyLevel)(-1))
                 {
-                    // Get all questions for this quiz that haven't been answered yet
                     var answeredQuestionIds = recentAnswers.Select(a => a.QuestionId).ToList();
-                    answeredQuestionIds.Add(questionId); // Include current question
+                    answeredQuestionIds.Add(questionId); 
 
                     nextQuestion = await _unitOfWork.Question.GetAsync(
                         q => q.QuizId == quizId && 
                              q.Difficulty == nextDifficulty && 
                              !answeredQuestionIds.Contains(q.Id),
-                        includeProperties: "Answers"  // Make sure to include answers
+                        includeProperties: "Answers"  
                     );
 
-                    // If no questions of desired difficulty, try other difficulties
                     if (nextQuestion == null)
                     {
                         nextQuestion = await _unitOfWork.Question.GetAsync(
                             q => q.QuizId == quizId && 
                                  !answeredQuestionIds.Contains(q.Id),
-                            includeProperties: "Answers"  // Make sure to include answers
+                            includeProperties: "Answers"  
                         );
                     }
                 }
 
-                // Save the user's answer
                 var userAnswer = new UserAnswer
                 {
                     UserId = user.Id,
@@ -350,7 +332,6 @@ namespace SmartTutor.Areas.Student.Controllers
                 _unitOfWork.UserAnswer.Add(userAnswer);
                 await _unitOfWork.SaveAsync();
 
-                // Generate explanation for incorrect answers
                 string explanation;
                 try
                 {
@@ -360,7 +341,6 @@ namespace SmartTutor.Areas.Student.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // If AI service fails, use a default explanation
                     explanation = isCorrect 
                         ? "Correct! Well done!" 
                         : "Incorrect. Please review the material and try again.";

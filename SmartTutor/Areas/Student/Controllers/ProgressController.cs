@@ -22,12 +22,10 @@ namespace SmartTutor.Areas.Student.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Challenge();
 
-            // Get all results without ordering first
             var results = await _unitOfWork.QuizResult.GetAllAsync(
                 q => q.UserId == user.Id,
                 includeProperties: "Quiz");
 
-            // Apply ordering in memory
             var orderedResults = results.OrderByDescending(r => r.TakenOn).ToList();
 
             var viewModel = new ProgressViewModel

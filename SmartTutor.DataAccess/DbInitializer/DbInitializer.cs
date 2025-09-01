@@ -49,9 +49,9 @@ namespace SmartTuror.DataAccess.DbInitializer
                 //if roles are not created, then we will create admin user as well
                 _userManager.CreateAsync(new ApplicationUser
                 {
-                    UserName = "admin@dotnetmastery.com",
-                    Email = "admin@dotnetmastery.com",
-                    Name = "Misha",
+                    UserName = "admin_adminovichi",
+                    Email = "admin@admin.com",
+                    Name = "Mihaela",
                     PhoneNumber = "1234567890",
                 }, "Admin123*").GetAwaiter().GetResult();
 

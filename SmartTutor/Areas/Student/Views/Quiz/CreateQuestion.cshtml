@@ -68,7 +68,6 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Add new answer
             $('#addAnswer').click(function() {
                 const answerIndex = $('#answersSection .answer-container').length;
                 const newAnswerHtml = `
@@ -88,10 +87,8 @@
                 $('#answersSection').append(newAnswerHtml);
             });
 
-            // Remove answer
             $(document).on('click', '.remove-answer', function() {
                 $(this).closest('.answer-container').remove();
-                // Reindex remaining answers
                 $('#answersSection .answer-container').each(function(index) {
                     $(this).find('input, label').each(function() {
                         const $el = $(this);
